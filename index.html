@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>나만의 디데이 카운터</title>
+    <style>
+        /* 깔끔한 검은색 디자인 세팅 */
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            font-family: 'Pretendard', -apple-system, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 40px;
+            font-weight: 600;
+        }
+
+        /* 메인 버튼 컨테이너 */
+        .button-container {
+            display: flex;
+            gap: 20px;
+            transition: opacity 0.5s ease;
+        }
+
+        /* 버튼 스타일링 */
+        button {
+            background-color: #2a2a2a;
+            color: white;
+            border: 1px solid #444;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #444;
+            transform: translateY(-3px); /* 마우스 올렸을 때 살짝 떠오르는 효과 */
+            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+        }
+
+        /* 결과 화면 디자인 */
+        #result-screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .d-day-text {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+
+        .back-btn {
+            margin-top: 40px;
+            background-color: transparent;
+            border: 1px solid #888;
+            color: #888;
+        }
+
+        .back-btn:hover {
+            background-color: #fff;
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="main-screen">
+        <h1>D-Day Tracker</h1>
+        <div class="button-container">
+            <button onclick="showDday('exam')">시험</button>
+            <button onclick="showDday('vacation')">방학</button>
+            <button onclick="showDday('suneung')">수능</button>
+        </div>
+    </div>
+
+    <div id="result-screen">
+        <div id="result-content"></div>
+        <button class="back-btn" onclick="goBack()">뒤로 가기</button>
+    </div>
+
+    <script>
+        // 디데이 계산 함수
+        function calculateDday(targetDateStr) {
+            const today = new Date('2026-04-19'); // 현재 기준일 (오늘 날짜로 바꾸려면 new Date() 사용)
+            const targetDate = new Date(targetDateStr);
+            const diffTime = targetDate - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays === 0) return "D-Day";
+            if (diffDays < 0) return `D+${Math.abs(diffDays)}`;
+            return `D-${diffDays}`;
+        }
+
+        // 화면 전환 및 데이터 표시 함수
+        function showDday(type) {
+            const mainScreen = document.getElementById('main-screen');
+            const resultScreen = document.getElementById('result-screen');
+            const resultContent = document.getElementById('result-content');
+
+            let htmlContent = '';
+
+            if (type === 'exam') {
+                htmlContent = `<div class="d-day-text">시험: 2026/04/23<br><span style="color: #ff6b6b">${calculateDday('2026-04-23')}</span></div>`;
+            } else if (type === 'vacation') {
+                htmlContent = `
+                    <div class="d-day-text">여름방학: 2026/07/20<br><span style="color: #4dabf7">${calculateDday('2026-07-20')}</span></div>
+                    <div class="d-day-text" style="margin-top: 30px;">겨울방학: 2027/01/29<br><span style="color: #4dabf7">${calculateDday('2027-01-29')}</span></div>
+                `;
+            } else if (type === 'suneung') {
+                htmlContent = `<div class="d-day-text">수능: 2028/11/01<br><span style="color: #fcc419">${calculateDday('2028-11-01')}</span></div>`;
+            }
+
+            resultContent.innerHTML = htmlContent;
+
+            // 페이드 인/아웃 애니메이션 처리
+            mainScreen.style.display = 'none';
+            resultScreen.style.display = 'flex';
+            setTimeout(() => {
+                resultScreen.style.opacity = 1;
+            }, 50);
+        }
+
+        // 메인 화면으로 돌아가는 함수
+        function goBack() {
+            const mainScreen = document.getElementById('main-screen');
+            const resultScreen = document.getElementById('result-screen');
+
+            resultScreen.style.opacity = 0;
+            setTimeout(() => {
+                resultScreen.style.display = 'none';
+                mainScreen.style.display = 'block';
+            }, 300);
+        }
+    </script>
+</body>
+</html>

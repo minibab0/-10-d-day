@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>다정고 1학년 실시간 디데이</title>
     <style>
         :root {
@@ -40,104 +40,58 @@
             text-align: center;
             transition: all 0.3s ease;
             overflow: hidden;
+            touch-action: manipulation;
         }
 
-        .theme-toggle {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            background: var(--btn-bg);
-            color: var(--text-color);
-            border: 1px solid var(--btn-border);
-            padding: 8px 15px;
-            border-radius: 20px;
-            cursor: pointer;
-            z-index: 100;
+        body.split-active .theme-toggle,
+        body.split-active .add-btn,
+        body.split-active .control-btns,
+        body.split-active .ratio-section,
+        body.split-active .info-text,
+        body.split-active h1 {
+            display: none !important;
         }
 
-        .add-btn {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 60px;
-            height: 60px;
-            background: var(--accent-color);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            font-size: 30px;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 100;
+        body.split-active .timer {
+            font-size: 2.5rem !important;
         }
+        body.split-active .label {
+            font-size: 1.2rem !important;
+        }
+
+        .theme-toggle { position: fixed; top: 20px; left: 20px; background: var(--btn-bg); color: var(--text-color); border: 1px solid var(--btn-border); padding: 8px 15px; border-radius: 20px; cursor: pointer; z-index: 100; }
+        .add-btn { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background: var(--accent-color); color: white; border: none; border-radius: 50%; font-size: 30px; cursor: pointer; z-index: 100; }
 
         #main-screen { display: flex; flex-direction: column; align-items: center; width: 100%; }
-        #quote-container { margin-bottom: 20px; padding: 10px 20px; max-width: 85%; min-height: 50px; }
-        #quote-text { font-size: 1.1rem; font-style: italic; color: var(--quote-color); line-height: 1.5; word-break: keep-all; }
-        h1 { font-size: 3.2rem; margin: 0 0 10px 0; letter-spacing: -1.5px; font-weight: 800; }
+        h1 { font-size: 3.2rem; margin: 0 0 10px 0; font-weight: 800; }
         .info-text { color: var(--sub-text); font-size: 1rem; margin-bottom: 40px; }
 
-        .button-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; max-width: 90%; }
-        button.nav-btn {
-            background-color: var(--btn-bg);
-            color: var(--text-color);
-            border: 1px solid var(--btn-border);
-            padding: 15px 35px;
-            font-size: 1.2rem;
-            border-radius: 15px;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-weight: 600;
-        }
-        button.nav-btn:hover { background-color: var(--text-color); color: var(--bg-color); transform: scale(1.05); }
+        .button-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; }
+        button.nav-btn { background: var(--btn-bg); color: var(--text-color); border: 1px solid var(--btn-border); padding: 15px 30px; font-size: 1.1rem; border-radius: 15px; cursor: pointer; font-weight: 600; }
 
         #result-screen { display: none; flex-direction: column; align-items: center; width: 100%; opacity: 0; transition: opacity 0.5s ease; }
-        .d-day-container { margin: 30px 0; width: 100%; }
-        .label { font-size: 1.6rem; color: var(--sub-text); margin-bottom: 15px; }
-        .timer { font-size: 4.5rem; font-weight: 900; line-height: 1.2; }
-        .timer-unit { font-size: 0.45em; opacity: 0.8; margin-left: 10px; font-weight: 400; }
+        .timer { font-size: 4.5rem; font-weight: 900; }
+        .timer-unit { font-size: 0.5em; opacity: 0.8; margin-left: 5px; }
 
-        .control-btns { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; justify-content: center; }
-        .edit-btn, .del-btn, .back-btn, .ratio-btn {
-            padding: 10px 20px;
-            border-radius: 50px;
-            cursor: pointer;
-            font-weight: 600;
-            border: 2px solid var(--btn-border);
-            background: transparent;
-            color: var(--sub-text);
-            transition: 0.2s;
-        }
-        .pip-btn { 
-            padding: 15px 30px; border-radius: 50px; cursor: pointer; font-weight: 800;
-            background: #ff9f43; color: white; border: none; font-size: 1.1rem;
-        }
-
-        #modal-bg {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7); z-index: 200; align-items: center; justify-content: center;
-        }
-        #custom-modal {
-            background: var(--modal-bg); padding: 30px; border-radius: 20px;
-            border: 1px solid var(--btn-border); width: 320px; display: flex; flex-direction: column; gap: 15px;
-        }
-        #m-color option { font-weight: bold; }
+        .control-btns { display: flex; gap: 10px; margin-top: 20px; }
+        .back-btn, .edit-btn, .del-btn, .ratio-btn { padding: 10px 20px; border-radius: 50px; cursor: pointer; border: 1px solid var(--btn-border); background: transparent; color: var(--sub-text); }
         
-        #pip-canvas, #pip-video { display: none; }
+        .ratio-section { margin-top: 30px; border-top: 1px solid var(--btn-border); padding-top: 20px; width: 80%; max-width: 400px; }
+        .pip-btn { width: 100%; padding: 15px; border-radius: 50px; background: #ff9f43; color: white; border: none; font-weight: 800; font-size: 1.1rem; cursor: pointer; margin-top: 10px; }
 
-        .ratio-btns { margin-bottom: 10px; display: flex; gap: 5px; }
-        .ratio-btn.active { background: var(--accent-color); color: white; border-color: var(--accent-color); }
+        #modal-bg { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 200; align-items: center; justify-content: center; }
+        #custom-modal { background: var(--modal-bg); padding: 30px; border-radius: 20px; width: 300px; display: flex; flex-direction: column; gap: 15px; }
+        
+        #toast { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.8); color: white; padding: 15px 25px; border-radius: 10px; display: none; z-index: 1000; pointer-events: none; }
     </style>
 </head>
-<body class="dark-mode">
+<body class="dark-mode" ondblclick="exitSplitMode()">
 
+    <div id="toast">더블탭하면 원래 화면으로 돌아옵니다</div>
     <button class="theme-toggle" onclick="toggleTheme()">🌗 테마 전환</button>
 
     <div id="main-screen">
-        <div id="quote-container"><div id="quote-text"></div></div>
+        <div id="quote-text" style="margin-bottom: 20px; color: var(--quote-color); font-style: italic;"></div>
         <h1>D-Day Tracker</h1>
         <p class="info-text">다정고등학교 2026년도 1학년 기준</p>
         <div class="button-container" id="btn-wrapper"></div>
@@ -149,14 +103,14 @@
         <div id="result-content"></div>
         <div class="control-btns" id="extra-controls"></div>
         
-        <div style="margin-top: 40px; border-top: 1px solid var(--btn-border); padding-top: 20px;">
-            <p style="font-size: 0.9rem; color: var(--sub-text); margin-bottom: 10px;">분할창 비율 선택</p>
-            <div class="ratio-btns">
-                <button class="ratio-btn active" onclick="setRatio(400, 200, this)">가로형(2:1)</button>
-                <button class="ratio-btn" onclick="setRatio(300, 300, this)">정사각형(1:1)</button>
-                <button class="ratio-btn" onclick="setRatio(200, 400, this)">세로형(1:2)</button>
+        <div class="ratio-section">
+            <p style="font-size: 0.8rem; color: var(--sub-text); margin-bottom: 10px;">분할창 비율 선택</p>
+            <div style="display: flex; gap: 5px; justify-content: center; margin-bottom: 10px;">
+                <button class="ratio-btn" onclick="setRatio(400, 200)">가로</button>
+                <button class="ratio-btn" onclick="setRatio(300, 300)">정사각</button>
+                <button class="ratio-btn" onclick="setRatio(200, 400)">세로</button>
             </div>
-            <button class="pip-btn" onclick="togglePip()">📺 분할창 조절</button>
+            <button class="pip-btn" onclick="enterSplitMode()">📺 분할모드 시작</button>
         </div>
         
         <div class="control-btns">
@@ -166,65 +120,53 @@
 
     <div id="modal-bg">
         <div id="custom-modal">
-            <h3 id="modal-title">나만의 디데이</h3>
-            <input type="text" id="m-title" placeholder="디데이 제목">
-            <input type="date" id="m-date">
-            <select id="m-color" onchange="this.style.color = this.value">
-                <option value="#ff4d4d" style="color: #ff4d4d;">빨강</option>
-                <option value="#ff9f43" style="color: #ff9f43;">주황</option>
-                <option value="#feca57" style="color: #feca57;">노랑</option>
-                <option value="#1dd1a1" style="color: #1dd1a1;">초록</option>
-                <option value="#54a0ff" style="color: #54a0ff;">파랑</option>
-                <option value="#341f97" style="color: #341f97;">남색</option>
-                <option value="#f368e0" style="color: #f368e0;">보라</option>
-                <option value="#ffffff" style="color: #888888;">흰색</option>
-                <option value="#222f3e" style="color: #222f3e;">검정</option>
+            <h3 style="margin:0">디데이 설정</h3>
+            <input type="text" id="m-title" placeholder="제목" style="padding:10px; border-radius:5px; border:1px solid #333; background:#000; color:#fff;">
+            <input type="date" id="m-date" style="padding:10px; border-radius:5px; border:1px solid #333; background:#000; color:#fff;">
+            <select id="m-color" onchange="this.style.color = this.value" style="padding:10px; border-radius:5px; border:1px solid #333; background:#000;">
+                <option value="#ff4d4d" style="color:#ff4d4d">빨강</option>
+                <option value="#ff9f43" style="color:#ff9f43">주황</option>
+                <option value="#feca57" style="color:#feca57">노랑</option>
+                <option value="#1dd1a1" style="color:#1dd1a1">초록</option>
+                <option value="#54a0ff" style="color:#54a0ff">파랑</option>
+                <option value="#ffffff" style="color:#888">흰색</option>
             </select>
-            <div class="modal-btn-wrap">
-                <button id="btn-save" style="background: var(--accent-color); color:white; padding:12px; border:none; border-radius:10px; cursor:pointer;" onclick="saveCustomDDay()">저장</button>
-                <button onclick="closeModal()" style="background: var(--btn-bg); color:var(--text-color); padding:12px; border:1px solid var(--btn-border); border-radius:10px; cursor:pointer;">취소</button>
-            </div>
+            <button onclick="saveCustomDDay()" style="padding:10px; background:var(--accent-color); color:white; border:none; border-radius:5px;">저장</button>
+            <button onclick="closeModal()" style="padding:10px; background:#333; color:white; border:none; border-radius:5px;">취소</button>
         </div>
     </div>
 
-    <canvas id="pip-canvas" width="400" height="200"></canvas>
-    <video id="pip-video" autoplay muted playsinline></video>
-
     <script>
-        const quotes = ["오늘 걷지 않으면 내일은 뛰어야 한다.", "할 수 있다고 믿는 사람은 결국 해낸다.", "꿈을 기록하는 것이 시작이다.", "내일의 나를 만드는 것은 오늘의 나다.", "노력은 결코 배신하지 않는다."];
-        let timerInterval;
-        let editTargetIndex = -1;
-        let currentTimerInfo = { label: "", d: 0, h: 0, m: 0, s: 0, color: "#ffffff", active: false };
-
-        function setRatio(w, h, btn) {
-            const canvas = document.getElementById('pip-canvas');
-            canvas.width = w;
-            canvas.height = h;
-            document.querySelectorAll('.ratio-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            drawPipCanvas();
-        }
+        const quotes = ["오늘 걷지 않으면 내일은 뛰어야 한다.", "할 수 있다고 믿는 사람은 결국 해낸다.", "꿈을 기록하는 것이 시작이다.", "노력은 결코 배신하지 않는다."];
+        let timerInterval, editTargetIndex = -1;
 
         function toggleTheme() {
             document.body.classList.toggle('light-mode');
             localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
         }
 
+        function enterSplitMode() {
+            document.body.classList.add('split-active');
+            const toast = document.getElementById('toast');
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 2500);
+        }
+
+        function exitSplitMode() {
+            if (document.body.classList.contains('split-active')) {
+                document.body.classList.remove('split-active');
+            }
+        }
+
         function openModal(index) {
             editTargetIndex = index;
             document.getElementById('modal-bg').style.display = 'flex';
-            const colorSelect = document.getElementById('m-color');
-            if (index === -1) {
-                document.getElementById('m-title').value = "";
-                document.getElementById('m-date').value = "";
-                colorSelect.value = "#ff4d4d";
-            } else {
+            if (index !== -1) {
                 const data = JSON.parse(localStorage.getItem('myDDays'))[index];
                 document.getElementById('m-title').value = data.title;
                 document.getElementById('m-date').value = data.date.split('T')[0];
-                colorSelect.value = data.color;
+                document.getElementById('m-color').value = data.color;
             }
-            colorSelect.style.color = colorSelect.value;
         }
 
         function closeModal() { document.getElementById('modal-bg').style.display = 'none'; }
@@ -243,7 +185,7 @@
 
         function renderButtons() {
             const wrapper = document.getElementById('btn-wrapper');
-            wrapper.innerHTML = `<button class="nav-btn" onclick="startTimer('exam')">시험</button><button class="nav-btn" onclick="startTimer('vacation')">방학</button><button class="nav-btn" onclick="startTimer('suneung')">수능</button>`;
+            wrapper.innerHTML = `<button class="nav-btn" onclick="startTimer('exam')">시험</button><button class="nav-btn" onclick="startTimer('vacation')">방학</button>`;
             JSON.parse(localStorage.getItem('myDDays') || '[]').forEach((item, i) => {
                 const btn = document.createElement('button');
                 btn.className = 'nav-btn'; btn.innerText = item.title; btn.style.color = item.color; btn.style.borderColor = item.color;
@@ -256,44 +198,38 @@
             const resultContent = document.getElementById('result-content');
             const controlArea = document.getElementById('extra-controls');
             const now = new Date();
-            let targets = (type === 'custom') ? [JSON.parse(localStorage.getItem('myDDays'))[index]] : {exam:[{label:'중간고사',date:'2026-04-23T00:00:00',color:'#ff5252'}],vacation:[{label:'여름방학',date:'2026-07-20T00:00:00',color:'#4dabf7'}],suneung:[{label:'2029 수능',date:'2028-11-01T00:00:00',color:'#ffcc00'}]}[type];
+            let targets = (type === 'custom') ? [JSON.parse(localStorage.getItem('myDDays'))[index]] : {exam:[{label:'중간고사',date:'2026-04-23T00:00:00',color:'#ff5252'}],vacation:[{label:'여름방학',date:'2026-07-20T00:00:00',color:'#4dabf7'}]}[type];
 
             if(type === 'custom') controlArea.innerHTML = `<button class="edit-btn" onclick="openModal(${index})">수정</button><button class="del-btn" onclick="deleteDDay(${index})">삭제</button>`;
             else controlArea.innerHTML = "";
 
             let html = '';
             targets.forEach(item => {
-                const diff = new Date(item.date || item.date) - now;
-                const d = Math.floor(diff / 86400000), h = Math.floor((diff/3600000)%24), m = Math.floor((diff/60000)%60), s = Math.floor((diff/1000)%60);
-                currentTimerInfo = { label: item.label || item.title, d, h, m, s, color: item.color, active: diff > 0 };
-                html += `<div class="d-day-container"><div class="label">${currentTimerInfo.label}</div><div class="timer" style="color:${item.color}">${diff>0?`D-${d} <span class="timer-unit">${h}h ${m}m ${s}s</span>`:'종료'}</div></div>`;
+                const targetDate = new Date(item.date);
+                const diff = targetDate - now;
+                
+                // 일수 계산 (당일 로직 포함)
+                const d = Math.floor(diff / 86400000);
+                const h = Math.floor((diff/3600000)%24);
+                const m = Math.floor((diff/60000)%60);
+                const s = Math.floor((diff/1000)%60);
+
+                let dDayText = `D-${d}`;
+                if (diff <= 0) {
+                    dDayText = "종료";
+                } else if (d === 0) {
+                    dDayText = "D-Day";
+                }
+
+                html += `
+                    <div class="d-day-container">
+                        <div class="label" style="color:var(--sub-text)">${item.label || item.title}</div>
+                        <div class="timer" style="color:${item.color}">
+                            ${diff > 0 ? `${dDayText} <span class="timer-unit">${h}h ${m}m ${s}s</span>` : '종료'}
+                        </div>
+                    </div>`;
             });
             resultContent.innerHTML = html;
-            drawPipCanvas();
-        }
-
-        function drawPipCanvas() {
-            const canvas = document.getElementById('pip-canvas'), ctx = canvas.getContext('2d');
-            const isLight = document.body.classList.contains('light-mode');
-            ctx.fillStyle = isLight ? "#ffffff" : "#000000";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.textAlign = "center"; ctx.fillStyle = isLight ? "#888888" : "#666666";
-            ctx.font = "bold 22px Pretendard"; ctx.fillText(currentTimerInfo.label, canvas.width/2, canvas.height * 0.25);
-            ctx.fillStyle = currentTimerInfo.color; ctx.font = "bold 65px Pretendard";
-            ctx.fillText(currentTimerInfo.active ? `D-${currentTimerInfo.d}` : "종료", canvas.width/2, canvas.height * 0.6);
-            if(currentTimerInfo.active) {
-                ctx.font = "26px Pretendard"; ctx.fillText(`${currentTimerInfo.h}h ${currentTimerInfo.m}m ${currentTimerInfo.s}s`, canvas.width/2, canvas.height * 0.85);
-            }
-        }
-
-        async function togglePip() {
-            const video = document.getElementById('pip-video'), canvas = document.getElementById('pip-canvas');
-            if (document.pictureInPictureElement) await document.exitPictureInPicture();
-            else {
-                video.srcObject = canvas.captureStream(10);
-                video.play();
-                try { await video.requestPictureInPicture(); } catch (e) { alert("아이패드 환경에서는 이 기능이 제한될 수 있습니다. 슬라이드 오버 모드를 권장합니다."); }
-            }
         }
 
         function startTimer(type, i) { 
@@ -303,13 +239,11 @@
             updateDisplay(type, i); timerInterval = setInterval(() => updateDisplay(type, i), 1000);
         }
 
-        function stopTimer() { clearInterval(timerInterval); setRandomQuote(); document.getElementById('result-screen').style.display = 'none'; document.getElementById('main-screen').style.display = 'flex'; }
+        function stopTimer() { clearInterval(timerInterval); document.getElementById('result-screen').style.display = 'none'; document.getElementById('main-screen').style.display = 'flex'; }
         
         function deleteDDay(i) { if(confirm("삭제할까요?")) { const d = JSON.parse(localStorage.getItem('myDDays')); d.splice(i,1); localStorage.setItem('myDDays', JSON.stringify(d)); stopTimer(); renderButtons(); } }
 
-        function setRandomQuote() { document.getElementById('quote-text').innerText = `오늘의 명언: "${quotes[Math.floor(Math.random() * quotes.length)]}"`; }
-
-        window.onload = () => { if (localStorage.getItem('theme') === 'light') document.body.classList.add('light-mode'); setRandomQuote(); renderButtons(); };
+        window.onload = () => { renderButtons(); document.getElementById('quote-text').innerText = quotes[Math.floor(Math.random()*quotes.length)]; };
     </script>
 </body>
 </html>

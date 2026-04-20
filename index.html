@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>다정고 1학년 실시간 디데이</title>
     <style>
-        /* 테마 변수 설정 */
         :root {
             --bg-color: #000000;
             --text-color: #ffffff;
@@ -41,7 +40,6 @@
             overflow: hidden;
         }
 
-        /* 테마 토글 버튼 (좌측 상단) */
         .theme-toggle {
             position: fixed;
             top: 20px;
@@ -52,11 +50,9 @@
             padding: 8px 15px;
             border-radius: 20px;
             cursor: pointer;
-            font-weight: 600;
             z-index: 100;
         }
 
-        /* 나만의 디데이 추가 버튼 (우측 하단) */
         .add-btn {
             position: fixed;
             bottom: 30px;
@@ -77,15 +73,12 @@
         }
 
         #main-screen { display: flex; flex-direction: column; align-items: center; width: 100%; }
-
         #quote-container { margin-bottom: 20px; padding: 10px 20px; max-width: 85%; min-height: 50px; }
         #quote-text { font-size: 1.1rem; font-style: italic; color: var(--quote-color); line-height: 1.5; word-break: keep-all; }
-
         h1 { font-size: 3.2rem; margin: 0 0 10px 0; letter-spacing: -1.5px; font-weight: 800; }
         .info-text { color: var(--sub-text); font-size: 1rem; margin-bottom: 40px; }
 
         .button-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; max-width: 90%; }
-
         button.nav-btn {
             background-color: var(--btn-bg);
             color: var(--text-color);
@@ -97,28 +90,28 @@
             transition: all 0.2s;
             font-weight: 600;
         }
-
         button.nav-btn:hover { background-color: var(--text-color); color: var(--bg-color); transform: scale(1.05); }
-        
-        /* 나만의 디데이 버튼 스타일 */
-        .custom-btn { border-color: var(--accent-color) !important; color: var(--accent-color) !important; }
 
         #result-screen { display: none; flex-direction: column; align-items: center; width: 100%; opacity: 0; transition: opacity 0.5s ease; }
         .d-day-container { margin: 30px 0; width: 100%; }
         .label { font-size: 1.6rem; color: var(--sub-text); margin-bottom: 15px; }
-        .timer { font-size: 4.5rem; font-weight: 900; line-height: 1.2; text-shadow: 0 0 20px rgba(128,128,128,0.2); }
+        .timer { font-size: 4.5rem; font-weight: 900; line-height: 1.2; }
         .timer-unit { font-size: 0.45em; opacity: 0.8; margin-left: 10px; font-weight: 400; }
 
-        .back-btn {
-            margin-top: 50px;
-            padding: 12px 35px;
-            font-size: 1.1rem;
+        .control-btns { display: flex; gap: 10px; margin-top: 30px; flex-wrap: wrap; justify-content: center; }
+        .edit-btn, .del-btn, .back-btn, .pip-btn {
+            padding: 10px 20px;
             border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
             border: 2px solid var(--btn-border);
             background: transparent;
             color: var(--sub-text);
-            cursor: pointer;
+            transition: 0.2s;
         }
+        .pip-btn { border-color: #ff9f43; color: #ff9f43; }
+        .pip-btn:hover { background: #ff9f43; color: white; }
+        #pip-canvas, #pip-video { display: none; }
     </style>
 </head>
 <body class="dark-mode">
@@ -129,23 +122,24 @@
         <div id="quote-container"><div id="quote-text">명언을 불러오는 중...</div></div>
         <h1>D-Day Tracker</h1>
         <p class="info-text">다정고등학교 2026년도 1학년 기준</p>
-
-        <div class="button-container" id="btn-wrapper">
-            <button class="nav-btn" onclick="startTimer('exam')">시험</button>
-            <button class="nav-btn" onclick="startTimer('vacation')">방학</button>
-            <button class="nav-btn" onclick="startTimer('suneung')">수능</button>
-            </div>
+        <div class="button-container" id="btn-wrapper"></div>
     </div>
 
     <button class="add-btn" onclick="addCustomDDay()">+</button>
 
     <div id="result-screen">
         <div id="result-content"></div>
-        <button class="back-btn" onclick="stopTimer()">뒤로 가기</button>
+        <div class="control-btns" id="extra-controls"></div>
+        <div class="control-btns">
+            <button class="pip-btn" id="pip-trigger" onclick="togglePip()">📺 PIP 모드</button>
+            <button class="back-btn" onclick="stopTimer()">뒤로 가기</button>
+        </div>
     </div>
 
+    <canvas id="pip-canvas" width="400" height="200"></canvas>
+    <video id="pip-video" autoplay muted playsinline></video>
+
     <script>
-        // 1. 명언 리스트 (100개)
         const quotes = [
             "오늘 걷지 않으면 내일은 뛰어야 한다.", "할 수 있다고 믿는 사람은 결국 해낸다.", "가장 큰 위험은 아무것도 하지 않는 것이다.", 
             "어제보다 나은 오늘을 만드는 것은 당신의 몫이다.", "포기하는 순간 시합은 종료되는 거야.", "작은 시작이 모여 위대한 결과를 만든다.", 
@@ -182,30 +176,27 @@
             "오늘의 선택이 너의 미래를 결정한다.", "멈추지 마라, 너는 잘하고 있다.", "할 수 있다는 믿음이 절반의 성공이다.", "네 인생의 주인공은 너다.", "후회 없는 오늘을 살아라."
         ];
 
-        // 2. 테마 전환 로직
+        let currentTimerInfo = { label: "", d: 0, h: 0, m: 0, s: 0, color: "#ffffff", active: false };
+        let timerInterval;
+
         function toggleTheme() {
-            const body = document.body;
-            body.classList.toggle('light-mode');
-            localStorage.setItem('theme', body.classList.contains('light-mode') ? 'light' : 'dark');
+            document.body.classList.toggle('light-mode');
+            localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
         }
 
-        // 3. 나만의 디데이 추가 로직
         function addCustomDDay() {
             const title = prompt("디데이 제목을 입력해주세요!");
             if (!title) return;
-            const date = prompt("날짜를 입력해주세요! (예: 2026-12-25)");
-            if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-                alert("날짜 형식이 올바르지 않습니다. (YYYY-MM-DD)");
-                return;
-            }
-
+            const date = prompt("날짜를 입력해주세요! (YYYY-MM-DD)", "2026-12-25");
+            if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) { alert("날짜 형식이 올바르지 않습니다."); return; }
+            const color = prompt("버튼 색상을 입력해주세요! (예: #ff5252, blue, green 등)", "#007bff");
+            
             const customData = JSON.parse(localStorage.getItem('myDDays') || '[]');
-            customData.push({ title, date: date + "T00:00:00" });
+            customData.push({ title, date: date + "T00:00:00", color: color || "#007bff" });
             localStorage.setItem('myDDays', JSON.stringify(customData));
             renderButtons();
         }
 
-        // 4. 버튼 렌더링
         function renderButtons() {
             const wrapper = document.getElementById('btn-wrapper');
             wrapper.innerHTML = `
@@ -216,23 +207,29 @@
             const customData = JSON.parse(localStorage.getItem('myDDays') || '[]');
             customData.forEach((item, index) => {
                 const btn = document.createElement('button');
-                btn.className = 'nav-btn custom-btn';
+                btn.className = 'nav-btn';
                 btn.innerText = item.title;
+                btn.style.borderColor = item.color;
+                btn.style.color = item.color;
                 btn.onclick = () => startTimer('custom', index);
                 wrapper.appendChild(btn);
             });
         }
 
-        // 5. 타이머 및 디스플레이 로직
-        let timerInterval;
         function updateDisplay(type, index) {
             const resultContent = document.getElementById('result-content');
+            const controlArea = document.getElementById('extra-controls');
             const now = new Date();
             let targets = [];
 
             if (type === 'custom') {
                 const customData = JSON.parse(localStorage.getItem('myDDays'));
-                targets = [{ label: customData[index].title, date: customData[index].date, color: '#007bff' }];
+                const item = customData[index];
+                targets = [{ label: item.title, date: item.date, color: item.color }];
+                controlArea.innerHTML = `
+                    <button class="edit-btn" onclick="editDDay(${index})">수정</button>
+                    <button class="del-btn" onclick="deleteDDay(${index})">삭제</button>
+                `;
             } else {
                 const baseTargets = {
                     exam: [{ label: '중간고사', date: '2026-04-23T00:00:00', color: '#ff5252' }],
@@ -243,20 +240,22 @@
                     suneung: [{ label: '2029 수능(예정)', date: '2028-11-01T00:00:00', color: '#ffcc00' }]
                 };
                 targets = baseTargets[type];
+                controlArea.innerHTML = "";
             }
 
             let html = '';
             targets.forEach(item => {
-                const targetDate = new Date(item.date);
-                const diff = targetDate - now;
+                const diff = new Date(item.date) - now;
+                const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+                const m = Math.floor((diff / (1000 * 60)) % 60);
+                const s = Math.floor((diff / 1000) % 60);
+
+                currentTimerInfo = { label: item.label, d, h, m, s, color: item.color, active: diff > 0 };
 
                 if (diff <= 0) {
-                    html += `<div class="d-day-container"><div class="label">${item.label}</div><div class="timer">D-Day 종료</div></div>`;
+                    html += `<div class="d-day-container"><div class="label">${item.label}</div><div class="timer">종료</div></div>`;
                 } else {
-                    const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-                    const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
-                    const m = Math.floor((diff / (1000 * 60)) % 60);
-                    const s = Math.floor((diff / 1000) % 60);
                     html += `
                         <div class="d-day-container">
                             <div class="label">${item.label}</div>
@@ -268,6 +267,40 @@
                 }
             });
             resultContent.innerHTML = html;
+            drawPipCanvas();
+        }
+
+        function drawPipCanvas() {
+            const canvas = document.getElementById('pip-canvas');
+            const ctx = canvas.getContext('2d');
+            const isLight = document.body.classList.contains('light-mode');
+            ctx.fillStyle = isLight ? "#ffffff" : "#000000";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.textAlign = "center";
+            ctx.fillStyle = isLight ? "#888888" : "#666666";
+            ctx.font = "bold 20px Pretendard";
+            ctx.fillText(currentTimerInfo.label, canvas.width / 2, 50);
+            ctx.fillStyle = currentTimerInfo.color;
+            ctx.font = "bold 60px Pretendard";
+            const timerText = currentTimerInfo.active ? `D-${currentTimerInfo.d}` : "D-Day 종료";
+            ctx.fillText(timerText, canvas.width / 2, 120);
+            if(currentTimerInfo.active) {
+                ctx.font = "24px Pretendard";
+                ctx.fillText(`${currentTimerInfo.h}h ${currentTimerInfo.m}m ${currentTimerInfo.s}s`, canvas.width / 2, 160);
+            }
+        }
+
+        async function togglePip() {
+            const video = document.getElementById('pip-video');
+            const canvas = document.getElementById('pip-canvas');
+            if (document.pictureInPictureElement) {
+                await document.exitPictureInPicture();
+            } else {
+                const stream = canvas.captureStream(10);
+                video.srcObject = stream;
+                video.play();
+                try { await video.requestPictureInPicture(); } catch (e) { alert("PIP를 지원하지 않는 브라우저입니다."); }
+            }
         }
 
         function startTimer(type, index = null) {
@@ -281,16 +314,34 @@
 
         function stopTimer() {
             clearInterval(timerInterval);
+            if (document.pictureInPictureElement) document.exitPictureInPicture();
             setRandomQuote();
-            const mainScreen = document.getElementById('main-screen');
-            const resultScreen = document.getElementById('result-screen');
-            resultScreen.style.opacity = 0;
-            setTimeout(() => {
-                resultScreen.style.display = 'none';
-                mainScreen.style.display = 'flex';
-                mainScreen.style.flexDirection = 'column'; // 버그 수정
-                mainScreen.style.alignItems = 'center';
-            }, 300);
+            document.getElementById('result-screen').style.display = 'none';
+            document.getElementById('main-screen').style.display = 'flex';
+        }
+
+        function editDDay(index) {
+            const customData = JSON.parse(localStorage.getItem('myDDays'));
+            const item = customData[index];
+            const newTitle = prompt("수정할 제목을 입력하세요", item.title);
+            const newDate = prompt("수정할 날짜 (YYYY-MM-DD)", item.date.split('T')[0]);
+            const newColor = prompt("수정할 색상", item.color);
+            if (newTitle && newDate) {
+                customData[index] = { title: newTitle, date: newDate + "T00:00:00", color: newColor || item.color };
+                localStorage.setItem('myDDays', JSON.stringify(customData));
+                updateDisplay('custom', index);
+                renderButtons();
+            }
+        }
+
+        function deleteDDay(index) {
+            if (confirm("정말 이 디데이를 삭제할까요?")) {
+                const customData = JSON.parse(localStorage.getItem('myDDays'));
+                customData.splice(index, 1);
+                localStorage.setItem('myDDays', JSON.stringify(customData));
+                stopTimer();
+                renderButtons();
+            }
         }
 
         function setRandomQuote() {
@@ -298,7 +349,6 @@
             document.getElementById('quote-text').innerText = `오늘의 명언: "${quotes[randomIndex]}"`;
         }
 
-        // 초기 실행
         window.onload = () => {
             if (localStorage.getItem('theme') === 'light') document.body.classList.add('light-mode');
             setRandomQuote();

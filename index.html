@@ -60,15 +60,18 @@
         }
 
         body.split-active #exit-split-btn { display: block; }
+        
+        /* 분할 모드 시 모든 UI 숨기기 (요청하신 버튼 포함) */
         body.split-active .theme-toggle,
         body.split-active .add-btn,
         body.split-active .control-btns,
         body.split-active .info-text,
-        body.split-active h1 {
+        body.split-active h1,
+        body.split-active .pip-btn {
             display: none !important;
         }
 
-        /* 분할 모드 시 글씨 크기 키움 */
+        /* 분할 모드 시 글씨 크기 */
         body.split-active .timer { font-size: 3.2rem !important; letter-spacing: -1px; }
         body.split-active .label { font-size: 1.5rem !important; margin-bottom: 10px; }
 
@@ -82,11 +85,9 @@
 
         .button-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; }
         button.nav-btn { background: var(--btn-bg); color: var(--text-color); border: 1px solid var(--btn-border); padding: 18px 35px; font-size: 1.2rem; border-radius: 18px; cursor: pointer; font-weight: 700; transition: 0.2s; }
-        button.nav-btn:active { transform: scale(0.95); }
 
         #result-screen { display: none; flex-direction: column; align-items: center; width: 100%; opacity: 0; transition: opacity 0.5s ease; }
         
-        /* 메인 타이머 글씨 크게 */
         .timer { font-size: 5.5rem; font-weight: 900; letter-spacing: -2px; }
         .timer-unit { font-size: 0.4em; opacity: 0.8; margin-left: 8px; font-weight: 500; }
         .label { font-size: 2rem; margin-bottom: 20px; font-weight: 600; }
@@ -94,11 +95,11 @@
         .control-btns { display: flex; gap: 12px; margin-top: 30px; }
         .back-btn, .edit-btn, .del-btn { padding: 12px 25px; border-radius: 50px; cursor: pointer; border: 1.5px solid var(--btn-border); background: transparent; color: var(--sub-text); font-weight: 600; }
         
-        .pip-btn { width: 220px; padding: 18px; border-radius: 50px; background: #ff9f43; color: white; border: none; font-weight: 800; font-size: 1.2rem; cursor: pointer; margin-top: 40px; box-shadow: 0 4px 12px rgba(255, 159, 67, 0.3); }
+        .pip-btn { width: 220px; padding: 18px; border-radius: 50px; background: #ff9f43; color: white; border: none; font-weight: 800; font-size: 1.2rem; cursor: pointer; margin-top: 40px; box-shadow: 0 4px 12px rgba(255, 159, 67, 0.3); transition: 0.2s; }
+        .pip-btn:active { transform: scale(0.95); }
 
         #modal-bg { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 200; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
         #custom-modal { background: var(--modal-bg); padding: 30px; border-radius: 25px; width: 320px; display: flex; flex-direction: column; gap: 18px; border: 1px solid var(--btn-border); }
-        #custom-modal input, #custom-modal select { padding: 12px; border-radius: 10px; border: 1px solid #333; background: #000; color: #fff; font-size: 1rem; }
     </style>
 </head>
 <body class="dark-mode">
@@ -120,7 +121,7 @@
         <div id="result-content"></div>
         <div class="control-btns" id="extra-controls"></div>
         
-        <button class="pip-btn" onclick="enterSplitMode()">📺 분할모드</button>
+        <button class="pip-btn" onclick="enterSplitMode()">📺 분할모드 시작</button>
         
         <div class="control-btns" style="margin-top: 20px;">
             <button class="back-btn" onclick="stopTimer()">뒤로 가기</button>
@@ -130,9 +131,9 @@
     <div id="modal-bg">
         <div id="custom-modal">
             <h3 style="margin:0; text-align: center;">디데이 설정</h3>
-            <input type="text" id="m-title" placeholder="제목을 입력하세요">
-            <input type="date" id="m-date">
-            <select id="m-color" onchange="this.style.color = this.value">
+            <input type="text" id="m-title" placeholder="제목을 입력하세요" style="padding:12px; border-radius:10px; border:1px solid #333; background:#000; color:#fff;">
+            <input type="date" id="m-date" style="padding:12px; border-radius:10px; border:1px solid #333; background:#000; color:#fff;">
+            <select id="m-color" onchange="this.style.color = this.value" style="padding:12px; border-radius:10px; border:1px solid #333; background:#000;">
                 <option value="#ff4d4d" style="color:#ff4d4d">빨강</option>
                 <option value="#ff9f43" style="color:#ff9f43">주황</option>
                 <option value="#feca57" style="color:#feca57">노랑</option>

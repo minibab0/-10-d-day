@@ -133,7 +133,7 @@
     <div id="result-screen">
         <div id="result-content"></div>
         <div class="control-btns" id="extra-controls"></div>
-        <button class="pip-btn" onclick="enterSplitMode()">📺 분할모드 시작</button>
+        <button class="pip-btn" onclick="enterSplitMode()">📺 집중모드 시작</button>
         <div class="control-btns" style="margin-top: 20px;">
             <button class="back-btn" onclick="stopTimer()">뒤로 가기</button>
         </div>
@@ -146,7 +146,7 @@
                 1. 아이패드 사파리에서 이 페이지를 엽니다.<br>
                 2. 우측 상단 <b>[공유 버튼]</b>을 누릅니다.<br>
                 3. 메뉴를 내려 <b>[홈 화면에 추가]</b>를 누릅니다.<br>
-                4. 바탕화면에 생긴 아이콘으로 실행하면 상단 바가 없는 <b>완벽한 전체화면</b>으로 사용 가능합니다!
+                4. 바탕화면에 생긴 아이콘으로 실행하면 <b>조금 더 깔끔한 전체화면</b>으로 사용 가능합니다!
             </div>
             <button onclick="closeHelp()" style="padding:15px; background:var(--accent-color); color:white; border:none; border-radius:12px; font-weight:bold; cursor:pointer;">이해했어요</button>
         </div>
@@ -241,6 +241,6 @@
         window.onload = () => { if (localStorage.getItem('theme') === 'light') document.body.classList.add('light-mode'); renderButtons(); document.getElementById('quote-text').innerText = quotes[Math.floor(Math.random()*quotes.length)]; };
     </script>
 
-    <div class="version-tag" style="position: fixed; bottom: 10px; left: 10px; font-size: 5pt; color: var(--sub-text); opacity: 0.5; z-index: 50;">v0.16</div>
+    <div class="version-tag" style="position: fixed; bottom: 10px; left: 10px; font-size: 5pt; color: var(--sub-text); opacity: 0.5; z-index: 50;">v0.17</div>
 </body>
 </html>

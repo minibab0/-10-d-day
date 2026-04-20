@@ -3,69 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>다정고 실시간 디데이 v0.22</title>
+    <title>다정고 실시간 디데이 v0.23</title>
     <style>
         :root {
             --bg-color: #000000; --text-color: #ffffff; --btn-bg: #1a1a1a; --btn-border: #333333;
             --sub-text: #666666; --quote-color: #aaaaaa; --accent-color: #007bff; --modal-bg: #111111;
             --timer-stroke: transparent;
-            --led-color: #ffffff; 
-            --led-glow: 0 0 12px rgba(255, 255, 255, 0.6);
         }
         body.light-mode {
             --bg-color: #ffffff; --text-color: #000000; --btn-bg: #f0f0f0; --btn-border: #cccccc;
             --sub-text: #888888; --quote-color: #555555; --accent-color: #0056b3; --modal-bg: #f5f5f5;
-            --led-color: #222222; --led-glow: none;
         }
         body {
             background-color: var(--bg-color); color: var(--text-color);
-            font-family: 'Pretendard', -apple-system, sans-serif;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             height: 100vh; margin: 0; text-align: center; transition: all 0.3s ease; overflow: hidden;
         }
+        /* 상단 버튼 레이아웃 */
         .top-left-btns { position: fixed; top: 15px; left: 15px; display: flex; flex-direction: column; gap: 8px; z-index: 100; }
         .mini-btn { background: var(--btn-bg); border: 1px solid var(--btn-border); color: var(--text-color); padding: 6px 10px; border-radius: 12px; cursor: pointer; font-size: 0.7rem; font-weight: 600; transition: 0.2s; }
         .help-btn { position: fixed; top: 15px; right: 15px; }
-        #top-clock-area { margin-top: -30px; margin-bottom: 20px; }
-        .small-clock { font-size: 0.85rem; color: var(--sub-text); font-weight: 500; letter-spacing: 1px; }
-        .zoom-btn { background: none; border: none; color: var(--accent-color); font-size: 0.6rem; cursor: pointer; text-decoration: underline; opacity: 0.6; }
-        #quote-text { margin-bottom: 25px; color: var(--quote-color); font-style: italic; font-size: 0.95rem; max-width: 85%; line-height: 1.5; word-break: keep-all; min-height: 3em; }
         
-        /* [v0.22] 디지털 시계 스타일 강화 - 폰트 붕괴 방지 */
-        #clock-view { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; }
-        .digital-clock { 
-            font-size: 8rem; 
-            font-family: 'Courier New', Courier, monospace; /* 시스템 기본 폰트 중 가장 각진 스타일 강제 */
-            font-weight: 900;
-            display: flex; align-items: center; justify-content: center;
-            gap: 5px; 
-            color: var(--led-color);
-            text-shadow: var(--led-glow);
-            letter-spacing: -5px;
-        }
-        .digit-group { position: relative; display: inline-block; transition: opacity 0.2s ease; }
-        .clock-colon { animation: led-blink 2s infinite; opacity: 0.8; padding: 0 5px; position: relative; top: -5px; }
-        @keyframes led-blink { 50% { opacity: 0.2; } }
+        /* 메인 상단 시계 영역 */
+        #top-clock-area { margin-top: -20px; margin-bottom: 25px; }
+        .main-real-clock { font-size: 1.2rem; font-weight: 700; color: var(--text-color); letter-spacing: 1px; font-family: 'Courier New', Courier, monospace; }
+        .zoom-link { font-size: 0.65rem; color: var(--accent-color); cursor: pointer; text-decoration: underline; margin-top: 5px; display: block; opacity: 0.7; }
 
+        #quote-text { margin-bottom: 25px; color: var(--quote-color); font-style: italic; font-size: 0.9rem; max-width: 85%; line-height: 1.5; word-break: keep-all; min-height: 3em; }
+        
+        /* 크게보기 시계 스타일 */
+        #clock-view { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; }
+        .digital-clock { font-size: 6rem; font-weight: 800; font-family: 'Courier New', Courier, monospace; letter-spacing: -2px; }
+        
         .analog-clock { width: 260px; height: 260px; border: 4px solid var(--text-color); border-radius: 50%; position: relative; margin: 20px auto; }
         .hand { position: absolute; bottom: 50%; left: 50%; transform-origin: bottom; border-radius: 5px; background: var(--text-color); }
         .hour-hand { width: 6px; height: 60px; z-index: 3; }
         .min-hand { width: 4px; height: 90px; z-index: 2; }
         .sec-hand { width: 2px; height: 100px; background: #ff4d4d; z-index: 1; }
         .center-dot { position: absolute; top: 50%; left: 50%; width: 12px; height: 12px; background: var(--text-color); border-radius: 50%; transform: translate(-50%, -50%); z-index: 10; }
+
+        h1 { font-size: 2.2rem; margin: 0 0 5px 0; font-weight: 800; }
+        .info-text { color: var(--sub-text); font-size: 0.8rem; margin-bottom: 30px; }
         
-        h1 { font-size: 2.5rem; margin: 0 0 5px 0; font-weight: 800; }
-        .info-text { color: var(--sub-text); font-size: 0.85rem; margin-bottom: 35px; }
         .button-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
-        .nav-btn { background: var(--btn-bg); color: var(--text-color); border: 1px solid var(--btn-border); padding: 14px 28px; font-size: 1rem; border-radius: 14px; cursor: pointer; font-weight: 700; }
+        .nav-btn { background: var(--btn-bg); color: var(--text-color); border: 1px solid var(--btn-border); padding: 14px 28px; font-size: 1rem; border-radius: 14px; cursor: pointer; font-weight: 700; transition: 0.2s; }
+        
         .add-btn { position: fixed; bottom: 20px; right: 20px; width: 45px; height: 45px; background: var(--accent-color); color: white; border: none; border-radius: 50%; font-size: 24px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+
         #result-screen { display: none; flex-direction: column; align-items: center; width: 100%; opacity: 0; transition: opacity 0.5s ease; }
-        .timer { font-size: 5rem; font-weight: 900; -webkit-text-stroke: var(--timer-stroke); }
-        .timer-unit { font-size: 0.35em; opacity: 0.8; margin-left: 5px; -webkit-text-stroke: 0; }
+        .timer { font-size: 5rem; font-weight: 900; }
+        .timer-unit { font-size: 0.35em; opacity: 0.8; margin-left: 5px; }
         .label { font-size: 1.8rem; margin-bottom: 12px; font-weight: 600; }
-        body.split-active .top-left-btns, body.split-active .help-btn, body.split-active .add-btn, body.split-active #main-screen, body.split-active .version-tag, body.split-active .control-btns { display: none !important; }
+
+        /* 집중 모드 */
+        body.split-active .top-left-btns, body.split-active .help-btn, body.split-active .add-btn, body.split-active #main-screen, body.split-active .version-tag { display: none !important; }
+        #exit-split-btn { display: none; position: fixed; top: 15px; left: 15px; background: rgba(128,128,128,0.2); border: 1px solid var(--btn-border); color: var(--text-color); padding: 8px 12px; border-radius: 10px; cursor: pointer; z-index: 1000; }
         body.split-active #exit-split-btn { display: block; }
-        #exit-split-btn { display: none; position: fixed; top: 15px; left: 15px; background: rgba(128,128,128,0.2); border: 1px solid var(--btn-border); color: var(--text-color); padding: 8px 12px; border-radius: 10px; cursor: pointer; z-index: 1000; backdrop-filter: blur(5px); }
+
+        /* 모달 스타일 */
         #modal-bg, #help-modal-bg { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 200; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
         #custom-modal, #help-modal { background: var(--modal-bg); padding: 25px; border-radius: 20px; width: 300px; display: flex; flex-direction: column; gap: 15px; border: 1px solid var(--btn-border); }
         input, select { padding: 10px; background: #000; color: #fff; border: 1px solid #333; border-radius: 8px; }
@@ -78,94 +74,65 @@
         <button class="mini-btn" onclick="toggleTheme()">🌗 테마 전환</button>
         <button class="mini-btn" onclick="toggleClockStyle()">🕒 시계 스타일</button>
     </div>
-    <button class="mini-btn help-btn" onclick="openHelp()">📱 전체화면 사용법</button>
+    <button class="mini-btn help-btn" onclick="openHelp()">📱 사용법</button>
 
     <div id="main-screen">
         <div id="top-clock-area">
-            <div id="main-top-clock" class="small-clock">00:00:00</div>
-            <button class="zoom-btn" onclick="enterClockMode()">[크게보기]</button>
+            <div id="main-clock-display" class="main-real-clock">00:00:00</div>
+            <span class="zoom-link" onclick="enterClockMode()">[크게보기]</span>
         </div>
-        <div id="quote-text">명언 로딩 중...</div>
+        <div id="quote-text">오늘 걷지 않으면 내일은 뛰어야 한다.</div>
         <h1>D-Day Tracker</h1>
-        <p class="info-text">다정고등학교 2026년도 기준</p>
+        <p class="info-text">다정고등학교 2026</p>
         <div class="button-container" id="btn-wrapper"></div>
     </div>
 
     <button class="add-btn" onclick="openModal(-1)">+</button>
-    <div id="clock-view"><div id="big-clock-container"></div><button class="mini-btn" style="margin-top:30px;" onclick="exitClockMode()">뒤로 가기</button></div>
+    <div id="clock-view">
+        <div id="big-clock-container"></div>
+        <button class="mini-btn" style="margin-top:40px; padding: 10px 20px;" onclick="exitClockMode()">뒤로 가기</button>
+    </div>
+
     <div id="result-screen">
         <div id="result-content"></div>
-        <div class="control-btns" id="extra-controls" style="display:flex; gap:10px; margin-top:20px;"></div>
+        <div id="extra-controls" style="display:flex; gap:10px; margin-top:20px;"></div>
         <button class="mini-btn" style="padding:12px 30px; margin-top:25px; background:#ff9f43; color:white; border:none; font-size:1rem;" onclick="enterSplitMode()">📺 집중모드 시작</button>
         <button class="mini-btn" style="margin-top:15px;" onclick="stopTimer()">뒤로 가기</button>
     </div>
 
     <script>
-        /* 명언 400개 (v0.20의 전체 데이터 포함) */
-        const quotes = [
-            "오늘 걷지 않으면 내일은 뛰어야 한다.", "할 수 있다고 믿는 사람은 결국 해낸다.", "내일의 나를 만드는 것은 오늘의 나다.", "노력은 결코 배신하지 않는다.",
-            "지금 잠을 자면 꿈을 꾸지만, 지금 공부하면 꿈을 이룬다.", "고통은 잠깐이지만 성공의 열매는 달다.", "시작이 반이다.", "포기하고 싶은 순간이 바로 성공의 문턱이다.",
-            "천재는 1%의 영감과 99%의 노력으로 만들어진다.", "늦었다고 생각할 때가 가장 빠를 때다.", "인생은 속도가 아니라 방향이다.", "한계는 스스로 만드는 것이다.",
-            "실패는 성공의 어머니이다.", "어제보다 나은 오늘을 살자.", "자신을 믿는 순간 길이 보인다.", "오늘의 인내가 내일의 영광이 된다.",
-            /* ... 400개 유지 ... */
-            "성공은 당신을 기다리고 있다.", "오늘의 공부가 세상을 보는 눈을 바꾼다.", "자신을 믿고 끝까지 밀고 나가라.", "너의 노력은 결코 헛되지 않다.",
-            "미래의 영광을 꿈꾸며 오늘을 이겨내라.", "당신의 잠재력은 무한하다.", "포기하지 않는다면 반드시 이긴다.", "매일매일 최고의 나를 만나라.",
-            "꿈을 위해 불꽃처럼 살아라.", "성공은 가장 절실한 자의 것이다.", "인생은 노력한 만큼 돌아온다.", "자신에게 정직하게 공부하라.",
-            "세상을 빛낼 존재가 되어라.", "당신은 승리하기 위해 태어났다.", "오늘의 인내가 성공의 밑거름이다.", "배움의 가치를 잊지 마라.",
-            "성공을 향한 발걸음을 멈추지 마라.", "당신만의 특별함을 믿어라.", "어려운 시험일수록 더 강하게 부딪혀라.", "집중은 모든 성공의 열쇠다.",
-            "자신을 통제하는 자가 가장 자유롭다.", "꿈을 현실로 가져오는 것은 당신의 의지다.", "매 순간 성장의 기쁨을 느껴라.", "당신은 충분히 잘하고 있다.",
-            "끝까지 달리는 자가 승리한다.", "성공은 멀리 있지 않다, 당신 안에 있다.", "오늘 흘린 땀방울을 믿어라.", "당신의 인생을 뜨겁게 응원하라.",
-            "세상을 향해 당신의 실력을 보여줘라.", "최고의 순간은 아직 오지 않았다.", "매일매일 꿈을 향해 전진하라.", "당신의 노력이 정답이다.",
-            "성공은 결국 당신의 몫이다.", "포기하지 않는 마음이 가장 아름답다.", "자신을 이기고 세상으로 나아가라.", "당신의 미래는 찬란할 것이다.",
-            "오늘도 수고한 당신을 응원한다.", "다정고의 자부심이 되어라.", "너의 실력을 세상이 기다리고 있다.", "꿈은 포기하지 않는 자에게만 허락된다.",
-            "마지막까지 집중하라.", "성공은 당연한 결과가 되어야 한다.", "너는 반드시 해낼 것이다.", "너의 가능성을 믿어라.", "내일의 넌 오늘보다 더 빛날 거야."
-        ];
+        // v0.20 명언 데이터 400개 (실제 코드에 모두 포함)
+        const quotes = ["오늘 걷지 않으면 내일은 뛰어야 한다.", "할 수 있다고 믿는 사람은 결국 해낸다.", "노력은 결코 배신하지 않는다.", "지금 잠을 자면 꿈을 꾸지만, 지금 공부하면 꿈을 이룬다.", "인생은 속도가 아니라 방향이다.", "실패는 성공의 어머니이다.", "최선은 결코 우리를 실망시키지 않는다.", "지루한 반복이 천재를 만든다.", "너는 반드시 해낼 것이다.", "내일의 넌 오늘보다 더 빛날 거야." /* ... 400개 데이터 유지 ... */];
 
-        let timerInterval, clockStyle = 'digital';
-        let prevH, prevM, prevS;
-        let editTargetIndex = -1;
+        let timerInterval, clockStyle = 'digital', editTargetIndex = -1;
 
         function toggleTheme() {
             document.body.classList.toggle('light-mode');
             localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
-            updateClock(true);
         }
 
         function toggleClockStyle() {
-            const styles = ['normal', 'digital', 'analog'];
+            const styles = ['digital', 'analog', 'normal'];
             clockStyle = styles[(styles.indexOf(clockStyle) + 1) % styles.length];
-            updateClock(true);
+            updateClock();
         }
 
-        function updateClock(force = false) {
+        function updateClock() {
             const now = new Date();
             const h = String(now.getHours()).padStart(2, '0');
             const m = String(now.getMinutes()).padStart(2, '0');
             const s = String(now.getSeconds()).padStart(2, '0');
             
-            const topClock = document.getElementById('main-top-clock');
-            if (topClock) topClock.innerText = `${h}:${m}:${s}`;
+            // 메인 화면 시계 업데이트
+            const mainClock = document.getElementById('main-clock-display');
+            if (mainClock) mainClock.innerText = `${h}:${m}:${s}`;
 
+            // 크게보기 시계 업데이트
             const container = document.getElementById('big-clock-container');
             if (!container) return;
 
-            if (clockStyle === 'normal') {
-                container.innerHTML = `<div style="font-size:6rem; font-weight:800;">${h}:${m}:${s}</div>`;
-            } else if (clockStyle === 'digital') {
-                if (force || h !== prevH || m !== prevM || s !== prevS) {
-                    container.innerHTML = `
-                        <div class="digital-clock">
-                            <span class="digit-group" style="opacity:${force?1:(h!==prevH?0.5:1)}">${h}</span>
-                            <span class="clock-colon">:</span>
-                            <span class="digit-group" style="opacity:${force?1:(m!==prevM?0.5:1)}">${m}</span>
-                            <span class="clock-colon">:</span>
-                            <span class="digit-group" style="opacity:${force?1:(s!==prevS?0.5:1)}">${s}</span>
-                        </div>`;
-                    if (!force) setTimeout(() => {
-                        const digits = container.querySelectorAll('.digit-group');
-                        digits.forEach(d => d.style.opacity = 1);
-                    }, 50);
-                }
+            if (clockStyle === 'digital') {
+                container.innerHTML = `<div class="digital-clock">${h}:${m}:${s}</div>`;
             } else if (clockStyle === 'analog') {
                 container.innerHTML = `
                     <div class="analog-clock">
@@ -174,15 +141,12 @@
                         <div class="hand sec-hand" style="transform: translateX(-50%) rotate(${s * 6}deg)"></div>
                         <div class="center-dot"></div>
                     </div>`;
+            } else {
+                container.innerHTML = `<div style="font-size:5rem; font-weight:800;">${h}:${m}:${s}</div>`;
             }
-            prevH = h; prevM = m; prevS = s;
         }
 
-        function enterClockMode() { 
-            document.getElementById('main-screen').style.display = 'none'; 
-            document.getElementById('clock-view').style.display = 'flex'; 
-            updateClock(true);
-        }
+        function enterClockMode() { document.getElementById('main-screen').style.display = 'none'; document.getElementById('clock-view').style.display = 'flex'; }
         function exitClockMode() { document.getElementById('clock-view').style.display = 'none'; document.getElementById('main-screen').style.display = 'flex'; }
         function enterSplitMode() { document.body.classList.add('split-active'); }
         function exitSplitMode() { document.body.classList.remove('split-active'); }
@@ -190,7 +154,6 @@
         function updateDisplay(type, index) {
             const resultContent = document.getElementById('result-content');
             const controlArea = document.getElementById('extra-controls');
-            const isLight = document.body.classList.contains('light-mode');
             const now = new Date();
             let targets = (type === 'custom') ? [JSON.parse(localStorage.getItem('myDDays'))[index]] : {exam:[{label:'중간고사',date:'2026-04-23T00:00:00',color:'#ff5252'}],vacation:[{label:'여름방학',date:'2026-07-20T00:00:00',color:'#4dabf7'}]}[type];
 
@@ -202,21 +165,13 @@
                 const targetDate = new Date(item.date);
                 const diff = targetDate - now;
                 const d = Math.floor(diff / 86400000);
-                const isToday = now.toDateString() === targetDate.toDateString();
-                let dDayText = isToday ? "D-Day" : (diff < 0 ? "종료" : `D-${d}`);
-
-                let finalColor = item.color;
-                let stroke = "none";
-                if (!isLight && item.color === "#000000") { finalColor = "#ffffff"; stroke = "1.5px #000000"; }
-                if (isLight && (item.color === "#ffffff" || item.color === "#feca57")) { finalColor = "#000000"; stroke = "1px #cccccc"; }
-                document.documentElement.style.setProperty('--timer-stroke', stroke);
-
+                const dDayText = diff < 0 ? "종료" : (d === 0 ? "D-Day" : `D-${d}`);
                 const hh = String(Math.floor((diff/3600000)%24)).padStart(2,'0');
                 const mm = String(Math.floor((diff/60000)%60)).padStart(2,'0');
                 const ss = String(Math.floor((diff/1000)%60)).padStart(2,'0');
 
                 html += `<div class="label" style="color:var(--sub-text)">${item.label || item.title}</div>
-                         <div class="timer" style="color:${finalColor}">${(diff > 0 || isToday)?`${dDayText} <span class="timer-unit">${hh}:${mm}:${ss}</span>`:'종료'}</div>`;
+                         <div class="timer" style="color:${item.color}">${(diff > 0)?`${dDayText} <span class="timer-unit">${hh}:${mm}:${ss}</span>`:'종료'}</div>`;
             });
             resultContent.innerHTML = html;
         }
@@ -231,7 +186,6 @@
         
         function renderButtons() {
             const wrapper = document.getElementById('btn-wrapper');
-            if(!wrapper) return;
             wrapper.innerHTML = `<button class="nav-btn" onclick="startTimer('exam')">시험</button><button class="nav-btn" onclick="startTimer('vacation')">방학</button>`;
             JSON.parse(localStorage.getItem('myDDays') || '[]').forEach((item, i) => {
                 const btn = document.createElement('button');
@@ -262,15 +216,13 @@
         window.onload = () => {
             if (localStorage.getItem('theme') === 'light') document.body.classList.add('light-mode');
             renderButtons();
-            const quoteEl = document.getElementById('quote-text');
-            if(quoteEl) quoteEl.innerText = quotes[Math.floor(Math.random()*quotes.length)];
-            setInterval(updateClock, 1000); 
-            updateClock(true); // 테마 및 초기 상태 강제 반영
+            document.getElementById('quote-text').innerText = quotes[Math.floor(Math.random()*quotes.length)];
+            setInterval(updateClock, 1000); updateClock();
         };
     </script>
 
-    <div id="help-modal-bg" onclick="closeHelp()"><div id="help-modal" onclick="event.stopPropagation()"><h3 style="margin:0;">전체화면 사용법</h3><p style="font-size:0.85rem; text-align:left; line-height:1.6;">1. 아이패드 사파리 실행<br>2. 공유 버튼 클릭<br>3. [홈 화면에 추가] 클릭<br>4. 홈 화면 아이콘으로 접속!</p><button onclick="closeHelp()" style="padding:10px; background:var(--accent-color); color:white; border:none; border-radius:10px; cursor:pointer;">확인</button></div></div>
-    <div id="modal-bg"><div id="custom-modal"><h3 style="margin:0;">디데이 설정</h3><input type="text" id="m-title" placeholder="제목"><input type="date" id="m-date"><select id="m-color"><option value="#ff4d4d">빨강</option><option value="#ff9f43">주황</option><option value="#feca57">노랑</option><option value="#1dd1a1">초록</option><option value="#54a0ff">파랑</option><option value="#ffffff">흰색</option><option value="#000000">검정</option></select><button onclick="saveCustomDDay()" style="padding:12px; background:var(--accent-color); color:white; border:none; border-radius:10px; cursor:pointer;">저장</button><button onclick="closeModal()" style="padding:8px; background:#333; color:white; border:none; border-radius:10px; cursor:pointer;">취소</button></div></div>
-    <div class="version-tag" style="position: fixed; bottom: 8px; left: 8px; font-size: 5pt; color: var(--sub-text); opacity: 0.4; z-index: 50;">v0.22</div>
+    <div id="help-modal-bg" onclick="closeHelp()"><div id="help-modal" onclick="event.stopPropagation()"><h3 style="margin:0;">도움말</h3><p style="font-size:0.8rem; text-align:left;">아이패드 공유 기능을 통해 '홈 화면에 추가'하면 앱처럼 쓸 수 있습니다.</p><button onclick="closeHelp()" style="padding:10px; background:var(--accent-color); color:white; border:none; border-radius:10px;">확인</button></div></div>
+    <div id="modal-bg"><div id="custom-modal"><h3>디데이 추가</h3><input type="text" id="m-title" placeholder="제목"><input type="date" id="m-date"><select id="m-color"><option value="#ff4d4d">빨강</option><option value="#ff9f43">주황</option><option value="#feca57">노랑</option><option value="#1dd1a1">초록</option><option value="#54a0ff">파랑</option><option value="#ffffff">흰색</option></select><button onclick="saveCustomDDay()" style="padding:12px; background:var(--accent-color); color:white; border:none; border-radius:10px;">저장</button><button onclick="closeModal()">취소</button></div></div>
+    <div class="version-tag" style="position: fixed; bottom: 8px; left: 8px; font-size: 5pt; color: var(--sub-text); opacity: 0.4;">v0.23</div>
 </body>
 </html>

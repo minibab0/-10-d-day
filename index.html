@@ -124,7 +124,7 @@
     <div id="main-screen">
         <div id="quote-text" style="margin-bottom: 25px; color: var(--quote-color); font-style: italic; font-size: 1.1rem;"></div>
         <h1>D-Day Tracker</h1>
-        <p class="info-text">다정고등학교 2026년도 1학년 기준</p>
+        <p class="info-text">다정고등학교 2026년도 기준 </p>
         <div class="button-container" id="btn-wrapper"></div>
     </div>
 
@@ -241,6 +241,6 @@
         window.onload = () => { if (localStorage.getItem('theme') === 'light') document.body.classList.add('light-mode'); renderButtons(); document.getElementById('quote-text').innerText = quotes[Math.floor(Math.random()*quotes.length)]; };
     </script>
 
-    <div class="version-tag" style="position: fixed; bottom: 10px; left: 10px; font-size: 5pt; color: var(--sub-text); opacity: 0.5; z-index: 50;">v0.15</div>
+    <div class="version-tag" style="position: fixed; bottom: 10px; left: 10px; font-size: 5pt; color: var(--sub-text); opacity: 0.5; z-index: 50;">v0.16</div>
 </body>
 </html>

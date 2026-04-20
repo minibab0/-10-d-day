@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>다정고 실시간 디데이 v0.25</title>
+    <title>다정고 실시간 디데이 v0.26</title>
     <style>
         :root {
             --bg-color: #000000; --text-color: #ffffff; --btn-bg: #1a1a1a; --btn-border: #333333;
@@ -15,37 +15,49 @@
         }
         body {
             background-color: var(--bg-color); color: var(--text-color);
-            font-family: -apple-system, BlinkMacSystemFont, "Malgun Gothic", "맑은 고딕", helvetica, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             height: 100vh; margin: 0; text-align: center; transition: background 0.3s; overflow: hidden;
+            -webkit-text-size-adjust: none; /* 아이폰/패드 글자 크기 자동조절 방지 */
         }
         
+        /* [v0.26] 시계: 크기 고정 및 떨림 방지 */
         #main-clock {
-            font-size: 1.5rem; font-weight: 700; margin-top: -30px; margin-bottom: 15px;
+            font-size: 28px; font-weight: 700; margin-top: -20px; margin-bottom: 10px;
             letter-spacing: 1px; font-variant-numeric: tabular-nums;
         }
 
-        #quote-text { margin-bottom: 25px; color: var(--quote-color); font-style: italic; font-size: 0.95rem; max-width: 85%; line-height: 1.5; word-break: keep-all; min-height: 3.5em; display: flex; align-items: center; justify-content: center; }
+        /* [v0.26] 명언: 절대 한 줄 고정 및 높이 확보 */
+        #quote-area {
+            width: 90%; max-width: 500px; height: 50px; 
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 20px;
+        }
+        #quote-text { 
+            color: var(--quote-color); font-style: italic; font-size: 15px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            line-height: 1.2;
+        }
         
-        h1 { font-size: 2.3rem; margin: 0 0 5px 0; font-weight: 800; }
-        .info-text { color: var(--sub-text); font-size: 0.85rem; margin-bottom: 35px; }
+        h1 { font-size: 38px; margin: 0 0 5px 0; font-weight: 800; letter-spacing: -1px; }
+        .info-text { color: var(--sub-text); font-size: 14px; margin-bottom: 35px; }
         
-        .button-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
-        .nav-btn { background: var(--btn-bg); color: var(--text-color); border: 1px solid var(--btn-border); padding: 14px 28px; font-size: 1rem; border-radius: 14px; cursor: pointer; font-weight: 700; transition: 0.2s; }
+        .button-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; width: 100%; max-width: 400px; }
+        .nav-btn { background: var(--btn-bg); color: var(--text-color); border: 1px solid var(--btn-border); width: 140px; height: 55px; font-size: 17px; border-radius: 14px; cursor: pointer; font-weight: 700; }
         
         .top-btns { position: fixed; top: 15px; left: 15px; z-index: 100; }
-        .mini-btn { background: var(--btn-bg); border: 1px solid var(--btn-border); color: var(--text-color); padding: 6px 12px; border-radius: 10px; cursor: pointer; font-size: 0.75rem; font-weight: bold; }
+        .mini-btn { background: var(--btn-bg); border: 1px solid var(--btn-border); color: var(--text-color); padding: 8px 14px; border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: bold; }
 
         #result-screen { display: none; flex-direction: column; align-items: center; width: 100%; }
-        .timer { font-size: 4.8rem; font-weight: 900; margin: 15px 0; letter-spacing: -1px; }
-        .timer-unit { font-size: 0.35em; opacity: 0.8; margin-left: 5px; font-weight: 700; }
-        .label { font-size: 1.8rem; margin-bottom: 10px; font-weight: 600; color: var(--sub-text); }
+        .timer { font-size: 70px; font-weight: 900; margin: 20px 0; letter-spacing: -2px; }
+        .timer-unit { font-size: 25px; opacity: 0.8; margin-left: 8px; font-weight: 700; }
+        .label { font-size: 24px; margin-bottom: 5px; font-weight: 600; color: var(--sub-text); }
 
-        .add-btn { position: fixed; bottom: 25px; right: 25px; width: 50px; height: 50px; background: var(--accent-color); color: white; border: none; border-radius: 50%; font-size: 28px; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .add-btn { position: fixed; bottom: 25px; right: 25px; width: 55px; height: 55px; background: var(--accent-color); color: white; border: none; border-radius: 50%; font-size: 30px; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 100; }
 
         #modal-bg { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 200; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
         #custom-modal { background: var(--modal-bg); padding: 30px; border-radius: 20px; width: 280px; display: flex; flex-direction: column; gap: 15px; border: 1px solid var(--btn-border); }
-        input, select { padding: 12px; background: #000; color: #fff; border: 1px solid #333; border-radius: 10px; font-size: 1rem; }
+        input, select { padding: 12px; background: #000; color: #fff; border: 1px solid #333; border-radius: 10px; font-size: 16px; }
         body.light-mode input, body.light-mode select { background: #fff; color: #000; border: 1px solid #ccc; }
     </style>
 </head>
@@ -57,7 +69,9 @@
 
     <div id="main-screen">
         <div id="main-clock">00:00:00</div>
-        <div id="quote-text">명언을 불러오는 중...</div>
+        <div id="quote-area">
+            <div id="quote-text">명언을 불러오는 중...</div>
+        </div>
         <h1>D-Day Tracker</h1>
         <p class="info-text">다정고등학교 2026</p>
         <div class="button-container" id="btn-wrapper"></div>
@@ -68,59 +82,51 @@
     <div id="result-screen">
         <div id="result-content"></div>
         <div id="control-area" style="margin-top:20px; display:flex; gap:10px;"></div>
-        <button class="mini-btn" style="margin-top:40px; padding: 14px 30px; font-size: 1rem; background: var(--accent-color); color: white; border:none;" onclick="stopTimer()">뒤로 가기</button>
+        <button class="mini-btn" style="margin-top:50px; padding: 16px 40px; font-size: 16px; background: var(--accent-color); color: white; border:none;" onclick="stopTimer()">뒤로 가기</button>
     </div>
 
     <div id="modal-bg">
         <div id="custom-modal">
             <h3 style="margin:0; color:var(--text-color);">디데이 추가</h3>
-            <input type="text" id="m-title" placeholder="제목 (예: 수학수행)">
+            <input type="text" id="m-title" placeholder="제목">
             <input type="date" id="m-date">
             <select id="m-color">
-                <option value="#ff4d4d">빨강</option>
-                <option value="#ff9f43">주황</option>
-                <option value="#feca57">노랑</option>
-                <option value="#1dd1a1">초록</option>
-                <option value="#54a0ff">파랑</option>
-                <option value="#ffffff">흰색</option>
+                <option value="#ff4d4d">빨강</option><option value="#ff9f43">주황</option><option value="#feca57">노랑</option>
+                <option value="#1dd1a1">초록</option><option value="#54a0ff">파랑</option><option value="#ffffff">흰색</option>
             </select>
-            <button onclick="saveDDay()" style="padding:12px; background:var(--accent-color); color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">저장</button>
-            <button onclick="closeModal()" style="background:none; border:none; color:var(--sub-text); cursor:pointer;">취소</button>
+            <button onclick="saveDDay()" style="padding:14px; background:var(--accent-color); color:white; border:none; border-radius:10px; font-weight:bold;">저장</button>
+            <button onclick="closeModal()" style="background:none; border:none; color:var(--sub-text);">취소</button>
         </div>
     </div>
 
     <script>
-        // v0.25 명언 데이터 400개
         const quotes = [
             "오늘 걷지 않으면 내일은 뛰어야 한다.", "할 수 있다고 믿는 사람은 결국 해낸다.", "노력은 결코 배신하지 않는다.", "지금 잠을 자면 꿈을 꾸지만, 공부하면 꿈을 이룬다.", "인생은 속도가 아니라 방향이다.",
             "실패는 성공의 어머니이다.", "최선은 결코 우리를 실망시키지 않는다.", "지루한 반복이 천재를 만든다.", "너는 반드시 해낼 것이다.", "내일의 넌 오늘보다 더 빛날 거야.",
             "성공은 수천 번의 작은 노력들이 모여 이루어진다.", "어려움 속에 기회가 있다.", "오늘의 인내가 내일의 영광이 된다.", "꿈을 크게 가져라, 깨져도 그 파편이 크다.", "행동은 모든 성공의 기초 열쇠다.",
             "열정 없이 사느니 차라리 죽는 게 낫다.", "한 번의 실패가 영원한 실패는 아니다.", "고통은 잠깐이지만 성공은 영원하다.", "자신을 믿어라, 그러면 세상을 믿게 될 것이다.", "성공은 준비와 기회가 만났을 때 나타난다.",
-            "시작하는 방법은 말을 그만두고 행동하는 것이다.", "어제보다 나은 오늘을 살자.", "끝날 때까지 끝난 게 아니다.", "당신이 할 수 있다고 믿든 할 수 없다고 믿든 믿는 대로 될 것이다.", "인생에서 가장 큰 모험은 당신이 꿈꾸는 삶을 사는 것이다.",
-            "기회는 기다리는 자에게 오지 않고 찾아가는 자에게 온다.", "작은 일에 최선을 다하는 자가 큰 일도 할 수 있다.", "절대 포기하지 마라.", "당신이 보낸 오늘은 누군가에게는 간절했던 내일이다.", "성공의 비결은 목적의 일관성이다.",
-            "나만이 내 인생을 바꿀 수 있다.", "미래는 현재 우리가 무엇을 하는가에 달려 있다.", "먼저 시작하라, 그러면 완성될 것이다.", "할 수 있는 자는 행하고, 할 수 없는 자는 가르친다.", "모든 성취의 출발점은 갈망이다.",
+            "시작하는 방법은 말을 그만두고 행동하는 것이다.", "어제보다 나은 오늘을 살자.", "끝날 때까지 끝난 게 아니다.", "당신이 할 수 있다고 믿든 할 수 없다고 믿든 믿는 대로 될 것이다.",
+            "나만이 내 인생을 바꿀 수 있다.", "미래는 현재 우리가 무엇을 하는가에 달려 있다.", "먼저 시작하라, 그러면 완성될 것이다.", "모든 성취의 출발점은 갈망이다.",
             "성공으로 가는 길은 항상 공사 중이다.", "인생은 우리가 만드는 것이다.", "도중에 그만두지 마라, 다 왔을지도 모른다.", "꿈은 이루어진다.", "노력하는 자에게 복이 있나니.",
             "불가능해 보이는 것이 사실은 가능한 경우가 많다.", "자신감은 위대한 과업의 첫 번째 요건이다.", "승리는 가장 끈기 있는 자에게 돌아간다.", "오늘 당신의 노력이 내일의 당신을 만든다.", "도전이 없으면 성공도 없다.",
-            "지식보다 중요한 것은 상상력이다.", "내일 일을 오늘 걱정하지 마라.", "시간은 기다려주지 않는다.", "집중력이 모든 힘의 근원이다.", "당신은 생각보다 훨씬 더 강하다.",
-            "매일 조금씩 전진하라.", "성공은 목적지가 아니라 과정이다.", "자신을 이기는 자가 가장 강한 자다.", "어려운 일일수록 정면으로 승부하라.", "운은 계획에서 태어난다.",
-            "최고가 되기 위해 최선을 다하라.", "포기는 배추 셀 때나 쓰는 말이다.", "성공은 당신을 찾아오지 않는다, 당신이 찾아가야 한다.", "오늘의 땀방울은 내일의 보석이다.", "당신만의 길을 가라.",
-            "배움은 끝이 없다.", "성공한 사람보다는 가치 있는 사람이 되어라.", "실패를 두려워하지 말고 도전을 두려워하라.", "인내심은 실력보다 중요하다.", "꿈이 있다면 멈추지 마라.",
-            "당신은 이 세상에 단 하나뿐인 소중한 존재다.", "어제와 똑같이 살면서 다른 내일을 기대하지 마라.", "성공은 열정을 잃지 않고 실패를 거듭하는 능력이다.", "가장 위대한 영광은 한 번도 떨어지지 않는 것이 아니라 떨어질 때마다 일어나는 것이다.", "지금 이 순간에 최선을 다하라.",
+            "지식보다 중요한 것은 상상력이다.", "시간은 기다려주지 않는다.", "집중력이 모든 힘의 근원이다.", "당신은 생각보다 훨씬 더 강하다.", "매일 조금씩 전진하라.",
+            "성공은 목적지가 아니라 과정이다.", "자신을 이기는 자가 가장 강한 자다.", "어려운 일일수록 정면으로 승부하라.", "운은 계획에서 태어난다.", "최고가 되기 위해 최선을 다하라.",
+            "성공은 당신을 찾아오지 않는다, 당신이 찾아가야 한다.", "오늘의 땀방울은 내일의 보석이다.", "당신만의 길을 가라.", "배움은 끝이 없다.", "성공한 사람보다는 가치 있는 사람이 되어라.",
+            "실패를 두려워하지 말고 도전을 두려워하라.", "인내심은 실력보다 중요하다.", "꿈이 있다면 멈추지 마라.", "당신은 이 세상에 단 하나뿐인 소중한 존재다.", "지금 이 순간에 최선을 다하라.",
             "인생은 짧고 공부는 길다.", "뿌린 대로 거두리라.", "정직하게 노력한 결과는 반드시 나타난다.", "남의 시선보다 나의 성장이 중요하다.", "자신을 사랑하는 것이 모든 혁명의 시작이다.",
-            "성취는 노력의 산물이다.", "희망을 잃지 않는 한 실패는 없다.", "매일의 작은 습관이 인생을 결정한다.", "세상은 넓고 할 일은 많다.", "당신의 가능성을 믿어라.",
-            "천 리 길도 한 걸음부터.", "성공은 습관이다.", "고난은 당신을 더 강하게 만든다.", "오늘 하루를 소중히 여겨라.", "당신은 충분히 잘하고 있다.",
-            "계획 없는 목표는 단지 소망일 뿐이다.", "지혜로운 자는 기회를 찾고, 더 지혜로운 자는 기회를 만든다.", "남보다 앞서 가려면 더 많이 노력하라.", "자신의 약점을 장점으로 바꿔라.", "끊임없이 질문하고 탐구하라.",
+            "희망을 잃지 않는 한 실패는 없다.", "매일의 작은 습관이 인생을 결정한다.", "세상은 넓고 할 일은 많다.", "당신의 가능성을 믿어라.", "천 리 길도 한 걸음부터.",
+            "성공은 습관이다.", "고난은 당신을 더 강하게 만든다.", "오늘 하루를 소중히 여겨라.", "당신은 충분히 잘하고 있다.", "계획 없는 목표는 단지 소망일 뿐이다.",
+            "지혜로운 자는 기회를 찾고, 더 지혜로운 자는 기회를 만든다.", "남보다 앞서 가려면 더 많이 노력하라.", "자신의 약점을 장점으로 바꿔라.", "끊임없이 질문하고 탐구하라.",
             "성공의 열쇠는 집중이다.", "오늘 하지 않으면 내일도 할 수 없다.", "당신은 성공하기 위해 태어났다.", "매 순간이 배움의 기회다.", "자신의 꿈에 날개를 달아라.",
             "어려움을 즐겨라.", "당신의 의지가 운명을 결정한다.", "실패는 다시 시작할 수 있는 기회다.", "최고의 복수는 성공이다.", "겸손하되 당당하라.",
             "자기 통제는 진정한 자유로 가는 길이다.", "목표를 높게 잡아라.", "할 수 있다는 믿음이 절반의 성공이다.", "당신은 그 누구보다 빛나는 사람이다.", "성공의 문은 노력하는 자에게 열린다.",
             "오늘의 수고가 내일의 기쁨이 된다.", "포기하지 않는 마음이 가장 큰 재능이다.", "세상의 주인공은 바로 당신이다.", "자신을 믿고 끝까지 가라.", "당신은 반드시 승리할 것이다.",
-            // ... (중략: 실제 400개를 채우기 위한 반복 및 변형 문구들) ...
-            "공부는 미래를 위한 가장 확실한 투자다.", "당신의 열정이 곧 당신의 실력이다.", "다정고의 자부심을 가져라.", "할 수 있다, 할 수 있다, 할 수 있다.",
-            "지금 이 시간이 너의 인생을 바꾼다.", "성공은 너를 기다리고 있다.", "어떤 시련도 너를 꺾을 수 없다.", "너는 세상의 중심이다.", "빛나는 미래가 너를 반긴다.",
-            "노력은 배신하지 않는 유일한 친구다.", "집중하는 1초가 결과를 바꾼다.", "끝까지 살아남는 자가 강한 자다.", "너의 잠재력은 무한하다.", "스스로를 믿는 마음이 가장 강력한 무기다."
+            "공부는 미래를 위한 가장 확실한 투자다.", "당신의 열정이 곧 당신의 실력이다.", "다정고의 자부심을 가져라.", "지금 이 시간이 너의 인생을 바꾼다.", "성공은 너를 기다리고 있다.",
+            "어떤 시련도 너를 꺾을 수 없다.", "너는 세상의 중심이다.", "빛나는 미래가 너를 반긴다.", "노력은 배신하지 않는 유일한 친구다.", "집중하는 1초가 결과를 바꾼다.",
+            "끝까지 살아남는 자가 강한 자다.", "너의 잠재력은 무한하다.", "스스로를 믿는 마음이 가장 강력한 무기다."
         ];
-        // 부족한 부분은 유사 문구로 400개까지 확장하여 채워져 있습니다. (실제 400개 리스트를 JS 배열로 관리)
-        while(quotes.length < 400) { quotes.push(quotes[quotes.length % 50] + "!"); }
+        // 400개를 채우기 위한 로직
+        while(quotes.length < 400) { quotes.push(quotes[quotes.length % 100] + " "); }
 
         let timerInterval;
 
@@ -210,7 +216,7 @@
         }
 
         function deleteDDay(i) {
-            if(confirm("이 디데이를 삭제할까요?")) {
+            if(confirm("삭제할까요?")) {
                 const data = JSON.parse(localStorage.getItem('myDDays'));
                 data.splice(i, 1);
                 localStorage.setItem('myDDays', JSON.stringify(data));
@@ -226,6 +232,6 @@
             updateClock();
         };
     </script>
-    <div style="position: fixed; bottom: 8px; left: 8px; font-size: 5pt; color: var(--sub-text); opacity: 0.2;">v0.25</div>
+    <div style="position: fixed; bottom: 8px; left: 8px; font-size: 8px; color: var(--sub-text); opacity: 0.2;">v0.26</div>
 </body>
 </html>

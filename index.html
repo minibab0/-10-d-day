@@ -42,6 +42,22 @@
             overflow: hidden;
         }
 
+        /* 전체화면 사용법 버튼 스타일 */
+        .help-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--btn-bg);
+            border: 1px solid var(--btn-border);
+            color: var(--text-color);
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            z-index: 100;
+        }
+
         /* 분할 모드 스타일 */
         #exit-split-btn {
             display: none;
@@ -60,9 +76,8 @@
         }
 
         body.split-active #exit-split-btn { display: block; }
-        
-        /* 분할 모드 시 모든 UI 숨기기 (요청하신 버튼 포함) */
         body.split-active .theme-toggle,
+        body.split-active .help-btn,
         body.split-active .add-btn,
         body.split-active .control-btns,
         body.split-active .info-text,
@@ -71,42 +86,40 @@
             display: none !important;
         }
 
-        /* 분할 모드 시 글씨 크기 */
-        body.split-active .timer { font-size: 3.2rem !important; letter-spacing: -1px; }
-        body.split-active .label { font-size: 1.5rem !important; margin-bottom: 10px; }
+        body.split-active .timer { font-size: 3.5rem !important; }
+        body.split-active .label { font-size: 1.6rem !important; }
 
-        /* 기본 레이아웃 */
         .theme-toggle { position: fixed; top: 20px; left: 20px; background: var(--btn-bg); color: var(--text-color); border: 1px solid var(--btn-border); padding: 8px 15px; border-radius: 20px; cursor: pointer; z-index: 100; }
         .add-btn { position: fixed; bottom: 30px; right: 30px; width: 65px; height: 65px; background: var(--accent-color); color: white; border: none; border-radius: 50%; font-size: 35px; cursor: pointer; z-index: 100; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
 
         #main-screen { display: flex; flex-direction: column; align-items: center; width: 100%; }
-        h1 { font-size: 3.5rem; margin: 0 0 10px 0; font-weight: 800; letter-spacing: -2px; }
+        h1 { font-size: 3.5rem; margin: 0 0 10px 0; font-weight: 800; }
         .info-text { color: var(--sub-text); font-size: 1.1rem; margin-bottom: 50px; }
 
         .button-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; }
-        button.nav-btn { background: var(--btn-bg); color: var(--text-color); border: 1px solid var(--btn-border); padding: 18px 35px; font-size: 1.2rem; border-radius: 18px; cursor: pointer; font-weight: 700; transition: 0.2s; }
+        button.nav-btn { background: var(--btn-bg); color: var(--text-color); border: 1px solid var(--btn-border); padding: 18px 35px; font-size: 1.2rem; border-radius: 18px; cursor: pointer; font-weight: 700; }
 
         #result-screen { display: none; flex-direction: column; align-items: center; width: 100%; opacity: 0; transition: opacity 0.5s ease; }
-        
-        .timer { font-size: 5.5rem; font-weight: 900; letter-spacing: -2px; }
-        .timer-unit { font-size: 0.4em; opacity: 0.8; margin-left: 8px; font-weight: 500; }
-        .label { font-size: 2rem; margin-bottom: 20px; font-weight: 600; }
+        .timer { font-size: 5.5rem; font-weight: 900; }
+        .timer-unit { font-size: 0.4em; opacity: 0.8; margin-left: 8px; }
+        .label { font-size: 2.2rem; margin-bottom: 20px; font-weight: 600; }
 
         .control-btns { display: flex; gap: 12px; margin-top: 30px; }
         .back-btn, .edit-btn, .del-btn { padding: 12px 25px; border-radius: 50px; cursor: pointer; border: 1.5px solid var(--btn-border); background: transparent; color: var(--sub-text); font-weight: 600; }
         
-        .pip-btn { width: 220px; padding: 18px; border-radius: 50px; background: #ff9f43; color: white; border: none; font-weight: 800; font-size: 1.2rem; cursor: pointer; margin-top: 40px; box-shadow: 0 4px 12px rgba(255, 159, 67, 0.3); transition: 0.2s; }
-        .pip-btn:active { transform: scale(0.95); }
+        .pip-btn { width: 220px; padding: 18px; border-radius: 50px; background: #ff9f43; color: white; border: none; font-weight: 800; font-size: 1.2rem; cursor: pointer; margin-top: 40px; }
 
-        #modal-bg { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 200; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
-        #custom-modal { background: var(--modal-bg); padding: 30px; border-radius: 25px; width: 320px; display: flex; flex-direction: column; gap: 18px; border: 1px solid var(--btn-border); }
+        #modal-bg, #help-modal-bg { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 200; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+        #custom-modal, #help-modal { background: var(--modal-bg); padding: 30px; border-radius: 25px; width: 340px; display: flex; flex-direction: column; gap: 18px; border: 1px solid var(--btn-border); }
+        .help-content { text-align: left; font-size: 0.95rem; line-height: 1.7; color: var(--text-color); }
+        .help-content b { color: var(--accent-color); }
     </style>
 </head>
 <body class="dark-mode">
 
     <button id="exit-split-btn" onclick="exitSplitMode()">← 돌아가기</button>
-
     <button class="theme-toggle" onclick="toggleTheme()">🌗 테마 전환</button>
+    <button class="help-btn" onclick="openHelp()">📱 전체화면 사용법</button>
 
     <div id="main-screen">
         <div id="quote-text" style="margin-bottom: 25px; color: var(--quote-color); font-style: italic; font-size: 1.1rem;"></div>
@@ -120,11 +133,23 @@
     <div id="result-screen">
         <div id="result-content"></div>
         <div class="control-btns" id="extra-controls"></div>
-        
         <button class="pip-btn" onclick="enterSplitMode()">📺 분할모드 시작</button>
-        
         <div class="control-btns" style="margin-top: 20px;">
             <button class="back-btn" onclick="stopTimer()">뒤로 가기</button>
+        </div>
+    </div>
+
+    <div id="help-modal-bg" onclick="closeHelp()">
+        <div id="help-modal" onclick="event.stopPropagation()">
+            <h3 style="margin:0; text-align: center;">전체화면 사용법</h3>
+            <div class="help-content">
+                1. 아이패드 사파리에서 이 페이지를 엽니다.<br>
+                2. 우측 상단 <b>[공유 버튼]</b>을 누릅니다.<br>
+                (정사각형에 화살표가 위로 향한 아이콘)<br>
+                3. 메뉴를 내려 <b>[홈 화면에 추가]</b>를 누릅니다.<br>
+                4. 바탕화면에 생긴 아이콘으로 실행하면 상단 바가 없는 <b>완벽한 전체화면</b>으로 사용 가능합니다!
+            </div>
+            <button onclick="closeHelp()" style="padding:15px; background:var(--accent-color); color:white; border:none; border-radius:12px; font-weight:bold; cursor:pointer;">이해했어요</button>
         </div>
     </div>
 
@@ -155,6 +180,9 @@
             localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
         }
 
+        function openHelp() { document.getElementById('help-modal-bg').style.display = 'flex'; }
+        function closeHelp() { document.getElementById('help-modal-bg').style.display = 'none'; }
+
         function enterSplitMode() { document.body.classList.add('split-active'); }
         function exitSplitMode() { document.body.classList.remove('split-active'); }
 
@@ -168,7 +196,6 @@
                 document.getElementById('m-color').value = data.color;
             }
         }
-
         function closeModal() { document.getElementById('modal-bg').style.display = 'none'; }
 
         function saveCustomDDay() {
@@ -208,7 +235,6 @@
                 const diff = new Date(item.date) - now;
                 const d = Math.floor(diff / 86400000), h = Math.floor((diff/3600000)%24), m = Math.floor((diff/60000)%60), s = Math.floor((diff/1000)%60);
                 let dDayText = (d === 0 && diff > 0) ? "D-Day" : (diff <= 0 ? "종료" : `D-${d}`);
-
                 html += `<div class="d-day-container"><div class="label" style="color:var(--sub-text)">${item.label || item.title}</div><div class="timer" style="color:${item.color}">${diff>0?`${dDayText} <span class="timer-unit">${h}h ${m}m ${s}s</span>`:'종료'}</div></div>`;
             });
             resultContent.innerHTML = html;

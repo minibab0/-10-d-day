@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>おい！ v0.28</title>
+    <title>다정고 디데이 v0.29</title>
     <style>
         :root {
             --bg-color: #000000; --text-color: #ffffff; --btn-bg: #1a1a1a; --btn-border: #333333;
@@ -13,36 +13,46 @@
             --bg-color: #ffffff; --text-color: #000000; --btn-bg: #f0f0f0; --btn-border: #cccccc;
             --sub-text: #888888; --quote-color: #555555; --accent-color: #0056b3;
         }
-        /* [v0.28] 전체 레이아웃 고정 */
+        
+        /* [v0.29] 배경색 부드러운 전환 (글씨 퍼짐을 막기 위해 color 속성은 transition 제외) */
         body {
             background-color: var(--bg-color); color: var(--text-color);
             font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            height: 100vh; margin: 0; overflow: hidden;
+            margin: 0; overflow: hidden; height: 100vh;
             -webkit-text-size-adjust: 100%;
+            transition: background-color 0.4s ease;
         }
 
-        /* 컨텐츠가 가로로 퍼지는 것을 방지하는 컨테이너 */
+        /* [v0.29] 부드러운 화면 전환을 위한 독립된 스크린 레이아웃 */
+        .screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: opacity 0.4s ease;
+        }
+        .screen.active { opacity: 1; z-index: 10; pointer-events: auto; }
+        .screen.hidden { opacity: 0; z-index: 0; pointer-events: none; }
+
         #main-container {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             width: 100%; max-width: 500px; padding: 20px;
         }
 
+        /* [v0.29] 시계 크기 증가 및 위치 조정 */
         #main-clock {
-            font-size: 32px; font-weight: 700; margin-bottom: 10px;
-            font-variant-numeric: tabular-nums; height: 40px;
+            font-size: 44px; font-weight: 700; margin-top: -40px; margin-bottom: 20px;
+            font-variant-numeric: tabular-nums; height: 50px;
         }
 
         #quote-area {
             height: 40px; display: flex; align-items: center; justify-content: center;
-            margin-bottom: 20px; width: 100%;
+            margin-bottom: 15px; width: 100%;
         }
         #quote-text { 
             color: var(--quote-color); font-style: italic; font-size: 15px;
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
         
-        h1 { font-size: 40px; margin: 0; font-weight: 800; letter-spacing: -1px; white-space: nowrap; }
+        h1 { font-size: 42px; margin: 0; font-weight: 800; letter-spacing: -1px; white-space: nowrap; }
         .info-text { color: var(--sub-text); font-size: 14px; margin-top: 5px; margin-bottom: 40px; }
         
         .button-container { 
@@ -54,46 +64,54 @@
             height: 55px; font-size: 17px; border-radius: 15px; cursor: pointer; font-weight: 700;
         }
         
-        .top-btns { position: fixed; top: 15px; left: 15px; }
+        .top-btns { position: absolute; top: 15px; left: 15px; z-index: 100; }
         .mini-btn { background: var(--btn-bg); border: 1px solid var(--btn-border); color: var(--text-color); padding: 8px 15px; border-radius: 10px; font-size: 13px; font-weight: bold; }
 
-        #result-screen { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; }
-        .timer { font-size: 72px; font-weight: 900; margin: 20px 0; font-variant-numeric: tabular-nums; letter-spacing: -2px; }
+        .timer { font-size: 72px; font-weight: 900; margin: 15px 0; font-variant-numeric: tabular-nums; letter-spacing: -2px; }
         .timer-unit { font-size: 26px; opacity: 0.8; margin-left: 8px; }
         .label { font-size: 26px; font-weight: 600; color: var(--sub-text); }
+        
+        /* [v0.29] 목표 날짜 표기 스타일 */
+        .target-date-display { font-size: 16px; font-weight: 500; color: var(--sub-text); margin-top: 5px; }
 
-        .add-btn { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background: var(--accent-color); color: white; border: none; border-radius: 50%; font-size: 32px; cursor: pointer; box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
+        /* [v0.29] 전체화면 사용법 문구 */
+        .fullscreen-tip { position: absolute; bottom: 25px; font-size: 12px; color: var(--sub-text); opacity: 0.7; pointer-events: none; }
 
-        #modal-bg { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 200; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .add-btn { position: absolute; bottom: 30px; right: 30px; width: 60px; height: 60px; background: var(--accent-color); color: white; border: none; border-radius: 50%; font-size: 32px; cursor: pointer; box-shadow: 0 4px 20px rgba(0,0,0,0.4); z-index: 100; }
+
+        #modal-bg { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 200; align-items: center; justify-content: center; backdrop-filter: blur(5px); transition: opacity 0.3s; opacity: 0; }
         #custom-modal { background: #111; padding: 30px; border-radius: 20px; width: 280px; display: flex; flex-direction: column; gap: 15px; border: 1px solid #333; }
-        input, select { padding: 14px; background: #000; color: #fff; border: 1px solid #333; border-radius: 10px; font-size: 16px; }
+        input, select { padding: 14px; background: #000; color: #fff; border: 1px solid #333; border-radius: 10px; font-size: 16px; -webkit-appearance: none; }
+        body.light-mode #custom-modal { background: #fff; border: 1px solid #ccc; }
+        body.light-mode input, body.light-mode select { background: #f9f9f9; color: #000; border: 1px solid #ddd; }
     </style>
 </head>
 <body class="dark-mode">
 
     <div class="top-btns"><button class="mini-btn" onclick="toggleTheme()">🌗 테마 전환</button></div>
 
-    <div id="main-screen">
+    <div id="main-screen" class="screen active">
         <div id="main-container">
             <div id="main-clock">00:00:00</div>
             <div id="quote-area"><div id="quote-text">오늘 걷지 않으면 내일은 뛰어야 한다.</div></div>
-            <h1>D-Day Tracker</h1>
+            <h1>DD-T!</h1>
             <p class="info-text">다정고등학교 2026</p>
             <div class="button-container" id="btn-wrapper"></div>
         </div>
+        <div class="fullscreen-tip">💡 사파리 공유버튼 ➔ '홈 화면에 추가'를 누르면 전체화면으로 쓸 수 있어요!</div>
     </div>
 
     <button class="add-btn" onclick="openModal()">+</button>
 
-    <div id="result-screen">
+    <div id="result-screen" class="screen hidden">
         <div id="result-content" style="display: flex; flex-direction: column; align-items: center;"></div>
-        <div id="control-area" style="margin-top:20px; display:flex; gap:10px;"></div>
-        <button class="mini-btn" style="margin-top:50px; padding: 18px 50px; font-size: 18px; background: var(--accent-color); color: white; border:none; border-radius: 15px;" onclick="stopTimer()">메인으로 가기</button>
+        <div id="control-area" style="margin-top:15px; display:flex; gap:10px;"></div>
+        <button class="mini-btn" style="margin-top:45px; padding: 18px 50px; font-size: 17px; background: var(--accent-color); color: white; border:none; border-radius: 15px;" onclick="stopTimer()">메인으로 가기</button>
     </div>
 
     <div id="modal-bg">
         <div id="custom-modal">
-            <h3 style="margin:0; color:#fff;">디데이 추가</h3>
+            <h3 style="margin:0; color:var(--text-color);">디데이 추가</h3>
             <input type="text" id="m-title" placeholder="제목">
             <input type="date" id="m-date">
             <select id="m-color">
@@ -101,20 +119,23 @@
                 <option value="#1dd1a1">초록</option><option value="#54a0ff">파랑</option><option value="#ffffff">흰색</option>
             </select>
             <button onclick="saveDDay()" style="padding:15px; background:var(--accent-color); color:white; border:none; border-radius:12px; font-weight:bold;">저장</button>
-            <button onclick="closeModal()" style="background:none; border:none; color:#888;">취소</button>
+            <button onclick="closeModal()" style="background:none; border:none; color:var(--sub-text);">취소</button>
         </div>
     </div>
 
     <script>
-        // 400개 명언 (공백 포함 데이터 유지)
         const quotes = ["오늘 걷지 않으면 내일은 뛰어야 한다.", "할 수 있다고 믿는 사람은 결국 해낸다.", "노력은 결코 배신하지 않는다.", "지금 잠을 자면 꿈을 꾸지만, 공부하면 꿈을 이룬다.", "인생은 속도가 아니라 방향이다.", "실패는 성공의 어머니이다.", "최선은 결코 우리를 실망시키지 않는다.", "지루한 반복이 천재를 만든다.", "너는 반드시 해낼 것이다.", "내일의 넌 오늘보다 더 빛날 거야.", "성공은 수천 번의 작은 노력들이 모여 이루어진다.", "어려움 속에 기회가 있다.", "오늘의 인내가 내일의 영광이 된다.", "꿈을 크게 가져라, 깨져도 그 파편이 크다.", "행동은 모든 성공의 기초 열쇠다.", "열정 없이 사느니 차라리 죽는 게 낫다.", "한 번의 실패가 영원한 실패는 아니다.", "고통은 잠깐이지만 성공은 영원하다.", "자신을 믿어라, 그러면 세상을 믿게 될 것이다.", "성공은 준비와 기회가 만났을 때 나타난다.", "시작하는 방법은 말을 그만두고 행동하는 것이다.", "어제보다 나은 오늘을 살자.", "끝날 때까지 끝난 게 아니다.", "당신이 할 수 있다고 믿든 할 수 없다고 믿든 믿는 대로 될 것이다.", "나만이 내 인생을 바꿀 수 있다.", "미래는 현재 우리가 무엇을 하는가에 달려 있다.", "먼저 시작하라, 그러면 완성될 것이다.", "모든 성취의 출발점은 갈망이다.", "성공으로 가는 길은 항상 공사 중이다.", "인생은 우리가 만드는 것이다.", "도중에 그만두지 마라, 다 왔을지도 모른다.", "꿈은 이루어진다.", "노력하는 자에게 복이 있나니.", "불가능해 보이는 것이 사실은 가능한 경우가 많다.", "자신감은 위대한 과업의 첫 번째 요건이다.", "승리는 가장 끈기 있는 자에게 돌아간다.", "오늘 당신의 노력이 내일의 당신을 만든다.", "도전이 없으면 성공도 없다.", "지식보다 중요한 것은 상상력이다.", "시간은 기다려주지 않는다.", "집중력이 모든 힘의 근원이다.", "당신은 생각보다 훨씬 더 강하다.", "매일 조금씩 전진하라.", "성공은 목적지가 아니라 과정이다.", "자신을 이기는 자가 가장 강한 자다.", "어려운 일일수록 정면으로 승부하라.", "운은 계획에서 태어난다.", "최고가 되기 위해 최선을 다하라.", "성공은 당신을 찾아오지 않는다, 당신이 찾아가야 한다.", "오늘의 땀방울은 내일의 보석이다.", "당신만의 길을 가라.", "배움은 끝이 없다.", "성공한 사람보다는 가치 있는 사람이 되어라.", "실패를 두려워하지 말고 도전을 두려워하라.", "인내심은 실력보다 중요하다.", "꿈이 있다면 멈추지 마라.", "당신은 이 세상에 단 하나뿐인 소중한 존재다.", "지금 이 순간에 최선을 다하라.", "인생은 짧고 공부는 길다.", "뿌린 대로 거두리라.", "정직하게 노력한 결과는 반드시 나타난다.", "남의 시선보다 나의 성장이 중요하다.", "자신을 사랑하는 것이 모든 혁명의 시작이다.", "희망을 잃지 않는 한 실패는 없다.", "매일의 작은 습관이 인생을 결정한다.", "세상은 넓고 할 일은 많다.", "당신의 가능성을 믿어라.", "천 리 길도 한 걸음부터.", "성공은 습관이다.", "고난은 당신을 더 강하게 만든다.", "오늘 하루를 소중히 여겨라.", "당신은 충분히 잘하고 있다.", "계획 없는 목표는 단지 소망일 뿐이다.", "지혜로운 자는 기회를 찾고, 더 지혜로운 자는 기회를 만든다.", "남보다 앞서 가려면 더 많이 노력하라.", "자신의 약점을 장점으로 바꿔라.", "끊임없이 질문하고 탐구하라.", "성공의 열쇠는 집중이다.", "오늘 하지 않으면 내일도 할 수 없다.", "당신은 성공하기 위해 태어났다.", "매 순간이 배움의 기회다.", "자신의 꿈에 날개를 달아라.", "어려움을 즐겨라.", "당신의 의지가 운명을 결정한다.", "실패는 다시 시작할 수 있는 기회다.", "최고의 복수는 성공이다.", "겸손하되 당당하라.", "자기 통제는 진정한 자유로 가는 길이다.", "목표를 높게 잡아라.", "할 수 있다는 믿음이 절반의 성공이다.", "당신은 그 누구보다 빛나는 사람이다.", "성공의 문은 노력하는 자에게 열린다.", "오늘의 수고가 내일의 기쁨이 된다.", "포기하지 않는 마음이 가장 큰 재능이다.", "세상의 주인공은 바로 당신이다.", "자신을 믿고 끝까지 가라.", "당신은 반드시 승리할 것이다.", "공부는 미래를 위한 가장 확실한 투자다.", "당신의 열정이 곧 당신의 실력이다.", "다정고의 자부심을 가져라.", "지금 이 시간이 너의 인생을 바꾼다.", "성공은 너를 기다리고 있다.", "어떤 시련도 너를 꺾을 수 없다.", "너는 세상의 중심이다.", "빛나는 미래가 너를 반긴다.", "노력은 배신하지 않는 유일한 친구다.", "집중하는 1초가 결과를 바꾼다.", "끝까지 살아남는 자가 강한 자다.", "너의 잠재력은 무한하다.", "스스로를 믿는 마음이 가장 강력한 무기다."];
         while(quotes.length < 400) { quotes.push(quotes[quotes.length % 100]); }
 
         let timerInterval;
+        let currentTimerType = null;
+        let currentTimerIndex = null;
 
         function toggleTheme() {
             document.body.classList.toggle('light-mode');
             localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
+            renderButtons(); // 테마 변경 시 버튼 글자색(흰색 방어) 다시 렌더링
+            if(currentTimerType) updateDisplay(currentTimerType, currentTimerIndex); // 현재 실행중인 타이머 색상도 즉각 반영
         }
 
         function updateClock() {
@@ -127,71 +148,121 @@
 
         function renderButtons() {
             const wrapper = document.getElementById('btn-wrapper');
-            wrapper.innerHTML = `<button class="nav-btn" onclick="startTimer('exam')">시험</button><button class="nav-btn" onclick="startTimer('vacation')">방학</button>`;
+            const isLight = document.body.classList.contains('light-mode');
+            
+            wrapper.innerHTML = `
+                <button class="nav-btn" onclick="startTimer('exam', null)" style="color:#ff5252; border-color:#ff5252;">시험</button>
+                <button class="nav-btn" onclick="startTimer('vacation', null)" style="color:#4dabf7; border-color:#4dabf7;">방학</button>
+            `;
             const customData = JSON.parse(localStorage.getItem('myDDays') || '[]');
             customData.forEach((item, i) => {
                 const btn = document.createElement('button');
                 btn.className = 'nav-btn'; btn.innerText = item.title;
-                btn.style.color = item.color; btn.style.borderColor = item.color;
+                // [v0.29] 라이트 테마에서 색상이 흰색일 경우 검은색으로 강제 변환
+                let displayColor = item.color;
+                if (isLight && displayColor === '#ffffff') displayColor = '#000000';
+                
+                btn.style.color = displayColor; 
+                btn.style.borderColor = displayColor;
                 btn.onclick = () => startTimer('custom', i);
                 wrapper.appendChild(btn);
             });
         }
 
+        // [v0.29] 부드러운 스크린 전환 로직
+        function switchScreen(fromId, toId) {
+            document.getElementById(fromId).classList.replace('active', 'hidden');
+            document.getElementById(toId).classList.replace('hidden', 'active');
+        }
+
         function startTimer(type, index) {
-            document.getElementById('main-screen').style.display = 'none';
-            document.getElementById('result-screen').style.display = 'flex';
+            currentTimerType = type;
+            currentTimerIndex = index;
+            switchScreen('main-screen', 'result-screen');
             updateDisplay(type, index);
             timerInterval = setInterval(() => updateDisplay(type, index), 1000);
         }
 
         function stopTimer() {
             clearInterval(timerInterval);
-            document.getElementById('result-screen').style.display = 'none';
-            document.getElementById('main-screen').style.display = 'flex';
+            currentTimerType = null;
+            currentTimerIndex = null;
+            switchScreen('result-screen', 'main-screen');
         }
 
         function updateDisplay(type, index) {
             const container = document.getElementById('result-content');
             const ctrl = document.getElementById('control-area');
             const now = new Date();
+            const isLight = document.body.classList.contains('light-mode');
             let target;
 
-            if(type === 'exam') { target = {label: '중간고사', date: '2026-04-23T00:00:00', color: '#ff5252'}; ctrl.innerHTML = ''; }
-            else if(type === 'vacation') { target = {label: '여름방학', date: '2026-07-20T00:00:00', color: '#4dabf7'}; ctrl.innerHTML = ''; }
+            if(type === 'exam') { target = {label: '중간고사', date: '2026-04-23', color: '#ff5252'}; ctrl.innerHTML = ''; }
+            else if(type === 'vacation') { target = {label: '여름방학', date: '2026-07-20', color: '#4dabf7'}; ctrl.innerHTML = ''; }
             else { 
                 target = JSON.parse(localStorage.getItem('myDDays'))[index];
+                // 커스텀 디데이는 뒤에 시간 문자열을 잘라 순수 날짜만 가져옵니다
+                if(target.date.includes('T')) target.date = target.date.split('T')[0];
                 ctrl.innerHTML = `<button class="mini-btn" onclick="deleteDDay(${index})" style="background:#ff4d4d; border:none; color:white;">삭제</button>`;
             }
 
-            const diff = new Date(target.date) - now;
-            const d = Math.floor(diff / 86400000);
-            const h = String(Math.floor((diff / 3600000) % 24)).padStart(2, '0');
-            const m = String(Math.floor((diff / 60000) % 60)).padStart(2, '0');
-            const s = String(Math.floor((diff / 1000) % 60)).padStart(2, '0');
+            // [v0.29] 폰트 색상 자동 반전 (라이트 모드 + 흰색)
+            let displayColor = target.color;
+            if (isLight && displayColor === '#ffffff') displayColor = '#000000';
+
+            // [v0.29] 날짜 기반 정확한 D-Day 계산 로직
+            const targetParts = target.date.split('-'); // YYYY, MM, DD
+            const targetDateObj = new Date(targetParts[0], targetParts[1] - 1, targetParts[2]);
+            const todayObj = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            
+            // 날짜 간의 순수 차이 (일 단위)
+            const dayDiff = Math.floor((targetDateObj - todayObj) / 86400000);
+            
+            let dDayLabel = "";
+            if (dayDiff > 0) { dDayLabel = `D-${dayDiff}`; } 
+            else if (dayDiff === 0) { dDayLabel = `D-Day!`; } 
+            else { dDayLabel = `종료 (D+${Math.abs(dayDiff)})`; }
+
+            // 하단 타이머 (H:M:S) 계산
+            const diffMs = targetDateObj - now;
+            const h = diffMs > 0 ? String(Math.floor((diffMs / 3600000) % 24)).padStart(2, '0') : "00";
+            const m = diffMs > 0 ? String(Math.floor((diffMs / 60000) % 60)).padStart(2, '0') : "00";
+            const s = diffMs > 0 ? String(Math.floor((diffMs / 1000) % 60)).padStart(2, '0') : "00";
 
             container.innerHTML = `
                 <div class="label">${target.label || target.title}</div>
-                <div class="timer" style="color:${target.color}">
-                    ${diff > 0 ? `D-${d} <span class="timer-unit">${h}:${m}:${s}</span>` : '종료'}
+                <div class="timer" style="color:${displayColor}">
+                    ${dDayLabel} 
+                    ${dayDiff >= 0 ? `<span class="timer-unit">${h}:${m}:${s}</span>` : ''}
                 </div>
+                <div class="target-date-display">${target.date}</div>
             `;
         }
 
-        function openModal() { document.getElementById('modal-bg').style.display = 'flex'; }
-        function closeModal() { document.getElementById('modal-bg').style.display = 'none'; }
+        function openModal() { 
+            const modalBg = document.getElementById('modal-bg');
+            modalBg.style.display = 'flex';
+            setTimeout(() => modalBg.style.opacity = '1', 10);
+        }
+        function closeModal() { 
+            const modalBg = document.getElementById('modal-bg');
+            modalBg.style.opacity = '0';
+            setTimeout(() => modalBg.style.display = 'none', 300);
+        }
+        
         function saveDDay() {
             const title = document.getElementById('m-title').value;
             const date = document.getElementById('m-date').value;
             const color = document.getElementById('m-color').value;
-            if(!title || !date) return alert("입력해주세요!");
+            if(!title || !date) return alert("항목을 모두 채워주세요!");
+            
             const data = JSON.parse(localStorage.getItem('myDDays') || '[]');
-            data.push({title, date: date + "T00:00:00", color});
+            data.push({title, date: date, color}); // T00:00:00 없이 순수 날짜만 저장
             localStorage.setItem('myDDays', JSON.stringify(data));
             closeModal(); renderButtons();
         }
         function deleteDDay(i) {
-            if(confirm("삭제할까요?")) {
+            if(confirm("이 디데이를 삭제할까요?")) {
                 const data = JSON.parse(localStorage.getItem('myDDays'));
                 data.splice(i, 1);
                 localStorage.setItem('myDDays', JSON.stringify(data));

@@ -8,27 +8,27 @@
 </head>
 <body>
     <div id="game-container">
-        <h1>🏀 파라볼릭 슛 (Parabolic Shoot)</h1>
-        <!-- 게임 화면 -->
+        <h1>🏀 (Parabolic Shoot)</h1>
+        
         <canvas id="gameCanvas" width="800" height="400"></canvas>
         
-        <!-- 컨트롤 패널 -->
         <div id="controls">
             <div class="control-group">
+                <label for="sliderP">중앙축 위치 (p): <span id="valP">15.0</span></label>
+                <input type="range" id="sliderP" min="5" max="28" step="0.1" value="15">
+            </div>
+            <div class="control-group">
+                <label for="sliderQ">최고점 높이 (q): <span id="valQ">15.0</span></label>
+                <input type="range" id="sliderQ" min="5" max="18" step="0.1" value="15">
+            </div>
+            <div class="control-group">
                 <label for="sliderA">곡률 (a): <span id="valA">-0.10</span></label>
-                <input type="range" id="sliderA" min="-0.5" max="-0.01" step="0.01" value="-0.1">
-            </div>
-            <div class="control-group">
-                <label for="sliderP">최고점 위치 (p): <span id="valP">10.0</span></label>
-                <input type="range" id="sliderP" min="0" max="20" step="0.1" value="10">
-            </div>
-            <div class="control-group">
-                <label for="sliderQ">최고점 높이 (q): <span id="valQ">10.0</span></label>
-                <input type="range" id="sliderQ" min="0" max="20" step="0.1" value="10">
+                <input type="range" id="sliderA" min="-0.3" max="-0.03" step="0.01" value="-0.1">
             </div>
             <button id="shootBtn">SHOOT!</button>
         </div>
-        <div id="message">방정식을 조절하여 골을 넣으세요!</div>
+        
+        <div id="message">중앙축과 높이를 조절해 골을 넣으세요!</div>
     </div>
     <script src="script.js"></script>
 </body>

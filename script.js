@@ -1,151 +1,110 @@
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
+// --- 핵심 변경 및 추가된 로직 ---
 
-// UI 및 제어 요소
-const sliderA = document.getElementById('sliderA'), sliderP = document.getElementById('sliderP'), sliderQ = document.getElementById('sliderQ');
-const valA = document.getElementById('valA'), valP = document.getElementById('valP'), valQ = document.getElementById('valQ');
-const levelText = document.getElementById('currentLevel'), eqText = document.getElementById('equationText');
-const shootBtn = document.getElementById('shootBtn'), message = document.getElementById('message');
-
-// 물리 환경 설정
-const scale = 20, originX = 60, originY = 380;
-let isShooting = false, ballX = 0, particles = [];
-
-// 5단계 레벨 데이터 (hoopX, hoopY)
+// 1. 단계별 설정 (위치 및 슬라이더 제한 범위)
 const levels = [
-    { x: 25, y: 8 }, { x: 34, y: 12 }, { x: 18, y: 15 }, { x: 30, y: 7 }, { x: 36, y: 16 }
+    { x: 25, y: 8,  rangeA: [-0.3, -0.05], rangeP: [10, 20] },
+    { x: 34, y: 12, rangeA: [-0.2, -0.03], rangeP: [15, 30] },
+    { x: 18, y: 15, rangeA: [-0.3, -0.1],  rangeP: [5, 15] },
+    { x: 30, y: 7,  rangeA: [-0.15, -0.04], rangeP: [20, 35] },
+    { x: 36, y: 16, rangeA: [-0.25, -0.05], rangeP: [10, 30] }
 ];
-let currentLevelIdx = 0;
 
-function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.beginPath(); ctx.strokeStyle = '#2a2a4a'; ctx.moveTo(0, originY); ctx.lineTo(canvas.width, originY); ctx.stroke();
+let curX, curY, vx, vy, gravity; // 물리 변수
+let isBounced = false; // 백보드 충돌 여부
 
-    const stage = levels[currentLevelIdx];
-    drawHoop(stage.x, stage.y);
-    
-    const a = parseFloat(sliderA.value), p = parseFloat(sliderP.value), q = parseFloat(sliderQ.value);
-
-    if (!isShooting) {
-        // 점선 궤적: 바닥 아래로 내려가지 않도록 수정
-        drawTrajectory(a, p, q);
-        drawBall(0, a * Math.pow(0 - p, 2) + q);
-    } else {
-        const y = a * Math.pow(ballX - p, 2) + q;
-        drawBall(ballX, y);
-    }
-    updateParticles();
-}
-
-function getCanvasX(mathX) { return originX + mathX * scale; }
-function getCanvasY(mathY) { return originY - mathY * scale; }
-
-function drawHoop(hx, hy) {
-    const cx = getCanvasX(hx), cy = getCanvasY(hy);
-    // 백보드 물리 영역 시각화
-    ctx.fillStyle = '#f0f0f0'; ctx.fillRect(cx + 10, cy - 50, 6, 100);
-    // 링 (물리 체크 대상)
-    ctx.beginPath(); ctx.strokeStyle = '#e94560'; ctx.lineWidth = 5;
-    ctx.moveTo(cx - 25, cy); ctx.lineTo(cx + 10, cy); ctx.stroke();
-}
-
-function drawBall(x, y) {
-    let cx = getCanvasX(x), cy = getCanvasY(y);
-    const radius = 12;
-    // 인터페이스 밖으로 나가지 않게 클램핑
-    cx = Math.max(radius, Math.min(canvas.width - radius, cx));
-    cy = Math.max(radius, Math.min(canvas.height - radius, cy));
-
-    // 공 디자인 개선 (입체감 및 무늬)
-    const grad = ctx.createRadialGradient(cx-4, cy-4, 2, cx, cy, radius);
-    grad.addColorStop(0, '#ffcc00'); grad.addColorStop(1, '#ff6600');
-    ctx.beginPath(); ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-    ctx.fillStyle = grad; ctx.fill();
-    ctx.strokeStyle = '#000'; ctx.lineWidth = 1.5; ctx.stroke();
-    // 농구공 무늬
-    ctx.beginPath(); ctx.arc(cx, cy, radius, 0, Math.PI, false); ctx.stroke();
-}
-
+// 2. 점선 그리기 (길이 단축)
 function drawTrajectory(a, p, q) {
-    ctx.beginPath(); ctx.strokeStyle = 'rgba(0, 255, 255, 0.4)'; ctx.setLineDash([4, 6]);
-    // 바닥(y=0)까지만 점선 표시
-    for (let x = 0; x <= 40; x += 0.5) {
+    ctx.beginPath();
+    ctx.strokeStyle = 'rgba(0, 255, 255, 0.4)';
+    ctx.setLineDash([2, 4]); // 더 촘촘하고 짧은 점선
+    
+    // x 범위를 10까지만 제한하여 가이드라인을 짧게 표시
+    for (let x = 0; x <= 10; x += 0.5) {
         const y = a * Math.pow(x - p, 2) + q;
-        if (y < -1) break; // 바닥 아래는 그리지 않음
+        if (y < 0) break;
         const cx = getCanvasX(x), cy = getCanvasY(y);
         if (x === 0) ctx.moveTo(cx, cy); else ctx.lineTo(cx, cy);
     }
     ctx.stroke(); ctx.setLineDash([]);
 }
 
+// 3. 발사 로직 (함수 -> 물리 기반 전환)
+function startShoot() {
+    const a = parseFloat(sliderA.value);
+    const p = parseFloat(sliderP.value);
+    const q = parseFloat(sliderQ.value);
+
+    // 초기 위치 (x=0일 때의 y값)
+    curX = 0;
+    curY = a * Math.pow(0 - p, 2) + q;
+    
+    // 물리 파라미터 계산: 수학 함수와 일치하는 초기 속도와 중력 도출
+    const speedScale = 0.45; 
+    vx = speedScale;
+    vy = (-2 * a * (0 - p)) * speedScale; // 함수의 미분계수를 이용한 초기 수직 속도
+    gravity = -2 * a * Math.pow(speedScale, 2); // 곡률(a)에 비례하는 중력값
+    
+    isShooting = true;
+    isBounced = false;
+    animateShoot();
+}
+
 function animateShoot() {
-    const a = parseFloat(sliderA.value), p = parseFloat(sliderP.value), q = parseFloat(sliderQ.value);
+    if (!isShooting) return;
+
+    // 물리 업데이트
+    curX += vx;
+    vy -= gravity; // 중력 적용
+    curY += vy;
+
+    const cx = getCanvasX(curX), cy = getCanvasY(curY);
     const stage = levels[currentLevelIdx];
-    ballX += 0.45;
-    const ballY = a * Math.pow(ballX - p, 2) + q;
+    const hoopX = getCanvasX(stage.x), hoopY = getCanvasY(stage.y);
 
-    // 물리 충돌 체크 (백보드 및 링)
-    const cx = getCanvasX(ballX), cy = getCanvasY(ballY);
-    const hoopCX = getCanvasX(stage.x), hoopCY = getCanvasY(stage.y);
-
-    // 1. 백보드 충돌 (공이 골대 뒤쪽 벽에 맞을 때)
-    if (ballX >= stage.x + 0.5 && ballY > stage.y - 2.5 && ballY < stage.y + 2.5) {
-        message.innerText = "텅! 백보드에 맞았습니다!";
-        isShooting = false; return;
+    // --- 백보드 충돌 판정 (튕겨나기) ---
+    // 백보드 위치(골대 뒤쪽 6px 영역)에 닿으면 x축 속도를 반전시킴
+    if (!isBounced && curX >= stage.x + 0.5 && curY > stage.y - 2.5 && curY < stage.y + 2.5) {
+        vx = -vx * 0.6; // 60%의 힘으로 튕겨나감
+        isBounced = true;
+        message.innerText = "백보드 강타! 들어갈까요?";
     }
 
-    // 2. 골인 판정
-    if (ballX >= stage.x - 1.2 && ballX <= stage.x + 0.5 && ballY >= stage.y - 0.8 && ballY <= stage.y + 0.8) {
-        message.innerText = `LEVEL ${currentLevelIdx + 1} CLEAR! 🎆`;
-        createFireworks(cx, cy);
+    // --- 골인 판정 ---
+    if (curX >= stage.x - 1.5 && curX <= stage.x + 0.5 && Math.abs(curY - stage.y) < 0.8 && vy < 0) {
+        message.innerText = "클린 샷! 성공!";
         isShooting = false;
+        createFireworks(cx, cy);
         setTimeout(nextLevel, 1500);
         return;
     }
 
-    if (ballY < -1 || ballX > 40) {
-        message.innerText = "다시 시도하세요!"; isShooting = false; return;
+    // 바닥 체크
+    if (curY < -1 || curX > 50 || curX < -10) {
+        message.innerText = "아쉽네요! 다시 해보세요.";
+        isShooting = false;
+        return;
     }
+
     draw();
-    if (isShooting) requestAnimationFrame(animateShoot);
+    drawBall(curX, curY);
+    requestAnimationFrame(animateShoot);
 }
 
-function nextLevel() {
-    currentLevelIdx++;
-    if (currentLevelIdx >= levels.length) {
-        message.innerText = "🏆 모든 단계를 정복했습니다! 챔피언!";
-        currentLevelIdx = 0;
-    }
+// 4. 단계별 범위 업데이트 함수
+function updateLevelConfig() {
+    const config = levels[currentLevelIdx];
+    sliderA.min = config.rangeA[0]; sliderA.max = config.rangeA[1];
+    sliderP.min = config.rangeP[0]; sliderP.max = config.rangeP[1];
+    
     levelText.innerText = currentLevelIdx + 1;
     updateValues();
 }
 
 function updateValues() {
-    valA.innerText = parseFloat(sliderA.value).toFixed(2);
-    valP.innerText = parseFloat(sliderP.value).toFixed(1);
-    valQ.innerText = parseFloat(sliderQ.value).toFixed(1);
-    // 실시간 방정식 업데이트
+    // 소수점 3자리까지 표시
+    valA.innerText = parseFloat(sliderA.value).toFixed(3);
+    valP.innerText = parseFloat(sliderP.value).toFixed(3);
+    valQ.innerText = parseFloat(sliderQ.value).toFixed(3);
     eqText.innerText = `y = ${valA.innerText}(x - ${valP.innerText})² + ${valQ.innerText}`;
     draw();
 }
-
-// 나머지 폭죽 로직 및 초기화 동일
-function createFireworks(x, y) {
-    for (let i = 0; i < 40; i++) {
-        const angle = Math.random() * Math.PI * 2, speed = Math.random() * 8 + 2;
-        particles.push({ x: x, y: y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, color: `hsl(${Math.random() * 360}, 100%, 60%)`, life: 1.0, gravity: 0.15 });
-    }
-}
-function updateParticles() {
-    for (let i = particles.length - 1; i >= 0; i--) {
-        const p = particles[i]; p.x += p.vx; p.y += p.vy; p.vy += p.gravity; p.life -= 0.015;
-        if (p.life <= 0) { particles.splice(i, 1); continue; }
-        ctx.beginPath(); ctx.arc(p.x, p.y, 3, 0, Math.PI * 2); ctx.fillStyle = p.color; ctx.globalAlpha = p.life; ctx.fill();
-    }
-    ctx.globalAlpha = 1.0;
-}
-
-sliderA.addEventListener('input', updateValues); sliderP.addEventListener('input', updateValues); sliderQ.addEventListener('input', updateValues);
-shootBtn.addEventListener('click', () => { if (!isShooting) { isShooting = true; ballX = 0; animateShoot(); } });
-function gameLoop() { if (!isShooting) draw(); requestAnimationFrame(gameLoop); }
-updateValues(); gameLoop();

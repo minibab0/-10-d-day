@@ -3,22 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>파라볼릭 슛: 포물선의 기적</title>
+    <title>파라볼릭 슛: 레벨 업 에디션</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div id="game-container">
-        <h1>🏀 (Parabolic Shoot)</h1>
+        <div id="header">
+            <h1>🏀 PARABOLIC SHOOT</h1>
+            <div id="level-display">STAGE: <span id="currentLevel">1</span> / 5</div>
+        </div>
         
         <canvas id="gameCanvas" width="800" height="400"></canvas>
         
+        <!-- 실시간 방정식 표시창 -->
+        <div id="equation-viewer">
+            현재 식: <span id="equationText">y = -0.10(x - 15.0)² + 15.0</span>
+        </div>
+
         <div id="controls">
             <div class="control-group">
-                <label for="sliderP">중앙축 위치 (p): <span id="valP">15.0</span></label>
-                <input type="range" id="sliderP" min="5" max="28" step="0.1" value="15">
+                <label for="sliderP">중앙축 (p): <span id="valP">15.0</span></label>
+                <input type="range" id="sliderP" min="2" max="35" step="0.1" value="15">
             </div>
             <div class="control-group">
-                <label for="sliderQ">최고점 높이 (q): <span id="valQ">15.0</span></label>
+                <label for="sliderQ">최고 높이 (q): <span id="valQ">15.0</span></label>
                 <input type="range" id="sliderQ" min="5" max="18" step="0.1" value="15">
             </div>
             <div class="control-group">
@@ -27,8 +35,7 @@
             </div>
             <button id="shootBtn">SHOOT!</button>
         </div>
-        
-        <div id="message">중앙축과 높이를 조절해 골을 넣으세요!</div>
+        <div id="message">단계별로 골대의 위치가 변합니다!</div>
     </div>
     <script src="script.js"></script>
 </body>

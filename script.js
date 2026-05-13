@@ -1,236 +1,151 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
-// UI 컨트롤
-const sliderA = document.getElementById('sliderA');
-const sliderP = document.getElementById('sliderP');
-const sliderQ = document.getElementById('sliderQ');
-const valA = document.getElementById('valA');
-const valP = document.getElementById('valP');
-const valQ = document.getElementById('valQ');
-const shootBtn = document.getElementById('shootBtn');
-const message = document.getElementById('message');
+// UI 및 제어 요소
+const sliderA = document.getElementById('sliderA'), sliderP = document.getElementById('sliderP'), sliderQ = document.getElementById('sliderQ');
+const valA = document.getElementById('valA'), valP = document.getElementById('valP'), valQ = document.getElementById('valQ');
+const levelText = document.getElementById('currentLevel'), eqText = document.getElementById('equationText');
+const shootBtn = document.getElementById('shootBtn'), message = document.getElementById('message');
 
-// 물리 및 좌표 설정
-const scale = 20; 
-const originX = 60; 
-const originY = 380; 
+// 물리 환경 설정
+const scale = 20, originX = 60, originY = 380;
+let isShooting = false, ballX = 0, particles = [];
 
-const hoopX = 33; 
-const hoopY = 11;
-
-let isShooting = false;
-let ballX = 0;
-let particles = [];
+// 5단계 레벨 데이터 (hoopX, hoopY)
+const levels = [
+    { x: 25, y: 8 }, { x: 34, y: 12 }, { x: 18, y: 15 }, { x: 30, y: 7 }, { x: 36, y: 16 }
+];
+let currentLevelIdx = 0;
 
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    // 바닥 선
-    ctx.beginPath();
-    ctx.strokeStyle = '#2a2a4a';
-    ctx.moveTo(0, originY);
-    ctx.lineTo(canvas.width, originY);
-    ctx.stroke();
+    ctx.beginPath(); ctx.strokeStyle = '#2a2a4a'; ctx.moveTo(0, originY); ctx.lineTo(canvas.width, originY); ctx.stroke();
 
-    drawHoop();
+    const stage = levels[currentLevelIdx];
+    drawHoop(stage.x, stage.y);
     
-    const a = parseFloat(sliderA.value);
-    const p = parseFloat(sliderP.value);
-    const q = parseFloat(sliderQ.value);
+    const a = parseFloat(sliderA.value), p = parseFloat(sliderP.value), q = parseFloat(sliderQ.value);
 
     if (!isShooting) {
-        // 궤적을 앞으로 조금만 표시 (힌트)
-        drawTrajectory(a, p, q, 6); 
-        // 시작 위치의 공
+        // 점선 궤적: 바닥 아래로 내려가지 않도록 수정
+        drawTrajectory(a, p, q);
         drawBall(0, a * Math.pow(0 - p, 2) + q);
     } else {
         const y = a * Math.pow(ballX - p, 2) + q;
         drawBall(ballX, y);
     }
-
     updateParticles();
 }
 
 function getCanvasX(mathX) { return originX + mathX * scale; }
 function getCanvasY(mathY) { return originY - mathY * scale; }
 
-function drawHoop() {
-    const cx = getCanvasX(hoopX);
-    const cy = getCanvasY(hoopY);
-    
-    // 백보드
-    ctx.fillStyle = '#f0f0f0';
-    ctx.fillRect(cx + 10, cy - 50, 6, 100);
-    
-    // 링 (골대)
-    ctx.beginPath();
-    ctx.strokeStyle = '#e94560';
-    ctx.lineWidth = 5;
-    ctx.lineCap = 'round';
-    ctx.moveTo(cx - 25, cy);
-    ctx.lineTo(cx + 10, cy);
-    ctx.stroke();
-
-    // 그물 효과
-    ctx.beginPath();
-    ctx.strokeStyle = 'rgba(255,255,255,0.3)';
-    ctx.lineWidth = 1;
-    for(let i=0; i<=3; i++) {
-        ctx.moveTo(cx - 20 + (i*10), cy);
-        ctx.lineTo(cx - 20 + (i*10), cy + 30);
-    }
-    ctx.stroke();
+function drawHoop(hx, hy) {
+    const cx = getCanvasX(hx), cy = getCanvasY(hy);
+    // 백보드 물리 영역 시각화
+    ctx.fillStyle = '#f0f0f0'; ctx.fillRect(cx + 10, cy - 50, 6, 100);
+    // 링 (물리 체크 대상)
+    ctx.beginPath(); ctx.strokeStyle = '#e94560'; ctx.lineWidth = 5;
+    ctx.moveTo(cx - 25, cy); ctx.lineTo(cx + 10, cy); ctx.stroke();
 }
 
 function drawBall(x, y) {
-    let cx = getCanvasX(x);
-    let cy = getCanvasY(y);
-
-    // 1. 공이 인터페이스(캔버스 영역) 밖으로 나가지 않게 클램핑
+    let cx = getCanvasX(x), cy = getCanvasY(y);
     const radius = 12;
+    // 인터페이스 밖으로 나가지 않게 클램핑
     cx = Math.max(radius, Math.min(canvas.width - radius, cx));
     cy = Math.max(radius, Math.min(canvas.height - radius, cy));
 
-    // 공 그림자
-    ctx.beginPath();
-    ctx.arc(cx, cy + 3, radius, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(0,0,0,0.3)';
-    ctx.fill();
-
-    // 공 본체
-    ctx.beginPath();
-    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-    ctx.fillStyle = '#ff8c00';
-    ctx.fill();
-    ctx.strokeStyle = '#fff';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-
+    // 공 디자인 개선 (입체감 및 무늬)
+    const grad = ctx.createRadialGradient(cx-4, cy-4, 2, cx, cy, radius);
+    grad.addColorStop(0, '#ffcc00'); grad.addColorStop(1, '#ff6600');
+    ctx.beginPath(); ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+    ctx.fillStyle = grad; ctx.fill();
+    ctx.strokeStyle = '#000'; ctx.lineWidth = 1.5; ctx.stroke();
     // 농구공 무늬
-    ctx.beginPath();
-    ctx.strokeStyle = '#333';
-    ctx.moveTo(cx - radius, cy);
-    ctx.lineTo(cx + radius, cy);
-    ctx.moveTo(cx, cy - radius);
-    ctx.lineTo(cx, cy + radius);
-    ctx.stroke();
+    ctx.beginPath(); ctx.arc(cx, cy, radius, 0, Math.PI, false); ctx.stroke();
 }
 
-function drawTrajectory(a, p, q, limitX) {
-    ctx.beginPath();
-    ctx.strokeStyle = 'rgba(0, 255, 255, 0.4)';
-    ctx.setLineDash([4, 6]);
-    
-    // 3. 궤적을 앞부분(limitX)만 표시
-    for (let x = 0; x <= limitX; x += 0.5) {
+function drawTrajectory(a, p, q) {
+    ctx.beginPath(); ctx.strokeStyle = 'rgba(0, 255, 255, 0.4)'; ctx.setLineDash([4, 6]);
+    // 바닥(y=0)까지만 점선 표시
+    for (let x = 0; x <= 40; x += 0.5) {
         const y = a * Math.pow(x - p, 2) + q;
-        const cx = getCanvasX(x);
-        const cy = getCanvasY(y);
-        if (x === 0) ctx.moveTo(cx, cy);
-        else ctx.lineTo(cx, cy);
+        if (y < -1) break; // 바닥 아래는 그리지 않음
+        const cx = getCanvasX(x), cy = getCanvasY(y);
+        if (x === 0) ctx.moveTo(cx, cy); else ctx.lineTo(cx, cy);
     }
-    ctx.stroke();
-    ctx.setLineDash([]);
-}
-
-// 4. 골인 축하 폭죽 효과
-function createFireworks(x, y) {
-    for (let i = 0; i < 40; i++) {
-        const angle = Math.random() * Math.PI * 2;
-        const speed = Math.random() * 8 + 2;
-        particles.push({
-            x: x,
-            y: y,
-            vx: Math.cos(angle) * speed,
-            vy: Math.sin(angle) * speed,
-            color: `hsl(${Math.random() * 360}, 100%, 60%)`,
-            life: 1.0,
-            gravity: 0.15
-        });
-    }
-}
-
-function updateParticles() {
-    for (let i = particles.length - 1; i >= 0; i--) {
-        const p = particles[i];
-        p.x += p.vx;
-        p.y += p.vy;
-        p.vy += p.gravity;
-        p.life -= 0.015;
-        
-        if (p.life <= 0) {
-            particles.splice(i, 1);
-            continue;
-        }
-        
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
-        ctx.fillStyle = p.color;
-        ctx.globalAlpha = p.life;
-        ctx.fill();
-    }
-    ctx.globalAlpha = 1.0;
+    ctx.stroke(); ctx.setLineDash([]);
 }
 
 function animateShoot() {
-    const a = parseFloat(sliderA.value);
-    const p = parseFloat(sliderP.value);
-    const q = parseFloat(sliderQ.value);
-    
-    ballX += 0.45; 
+    const a = parseFloat(sliderA.value), p = parseFloat(sliderP.value), q = parseFloat(sliderQ.value);
+    const stage = levels[currentLevelIdx];
+    ballX += 0.45;
     const ballY = a * Math.pow(ballX - p, 2) + q;
-    
-    draw();
 
-    // 골인 판정
-    if (ballX >= hoopX - 1.5 && ballX <= hoopX + 1) {
-        if (ballY >= hoopY - 1 && ballY <= hoopY + 1) {
-            message.innerText = "SWISH! 🎆 골인입니다!";
-            message.style.color = "#00ffcc";
-            createFireworks(getCanvasX(ballX), getCanvasY(ballY));
-            isShooting = false;
-            return;
-        }
+    // 물리 충돌 체크 (백보드 및 링)
+    const cx = getCanvasX(ballX), cy = getCanvasY(ballY);
+    const hoopCX = getCanvasX(stage.x), hoopCY = getCanvasY(stage.y);
+
+    // 1. 백보드 충돌 (공이 골대 뒤쪽 벽에 맞을 때)
+    if (ballX >= stage.x + 0.5 && ballY > stage.y - 2.5 && ballY < stage.y + 2.5) {
+        message.innerText = "텅! 백보드에 맞았습니다!";
+        isShooting = false; return;
     }
 
-    // 바닥 충돌 판정 (y < 0)
-    if (ballY < -1 || ballX > 38) {
-        message.innerText = "아쉽네요! 방정식을 다시 세워보세요.";
-        message.style.color = "#ff4d4d";
+    // 2. 골인 판정
+    if (ballX >= stage.x - 1.2 && ballX <= stage.x + 0.5 && ballY >= stage.y - 0.8 && ballY <= stage.y + 0.8) {
+        message.innerText = `LEVEL ${currentLevelIdx + 1} CLEAR! 🎆`;
+        createFireworks(cx, cy);
         isShooting = false;
+        setTimeout(nextLevel, 1500);
         return;
     }
 
+    if (ballY < -1 || ballX > 40) {
+        message.innerText = "다시 시도하세요!"; isShooting = false; return;
+    }
+    draw();
     if (isShooting) requestAnimationFrame(animateShoot);
+}
+
+function nextLevel() {
+    currentLevelIdx++;
+    if (currentLevelIdx >= levels.length) {
+        message.innerText = "🏆 모든 단계를 정복했습니다! 챔피언!";
+        currentLevelIdx = 0;
+    }
+    levelText.innerText = currentLevelIdx + 1;
+    updateValues();
 }
 
 function updateValues() {
     valA.innerText = parseFloat(sliderA.value).toFixed(2);
     valP.innerText = parseFloat(sliderP.value).toFixed(1);
     valQ.innerText = parseFloat(sliderQ.value).toFixed(1);
+    // 실시간 방정식 업데이트
+    eqText.innerText = `y = ${valA.innerText}(x - ${valP.innerText})² + ${valQ.innerText}`;
     draw();
 }
 
-sliderA.addEventListener('input', updateValues);
-sliderP.addEventListener('input', updateValues);
-sliderQ.addEventListener('input', updateValues);
-
-shootBtn.addEventListener('click', () => {
-    if (!isShooting) {
-        isShooting = true;
-        ballX = 0;
-        message.innerText = "슛 진행 중...";
-        message.style.color = "#ffd700";
-        animateShoot();
+// 나머지 폭죽 로직 및 초기화 동일
+function createFireworks(x, y) {
+    for (let i = 0; i < 40; i++) {
+        const angle = Math.random() * Math.PI * 2, speed = Math.random() * 8 + 2;
+        particles.push({ x: x, y: y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, color: `hsl(${Math.random() * 360}, 100%, 60%)`, life: 1.0, gravity: 0.15 });
     }
-});
-
-// 초기화
-updateValues();
-// 폭죽 애니메이션을 위한 루프
-function gameLoop() {
-    if (!isShooting) draw();
-    requestAnimationFrame(gameLoop);
 }
-gameLoop();
+function updateParticles() {
+    for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i]; p.x += p.vx; p.y += p.vy; p.vy += p.gravity; p.life -= 0.015;
+        if (p.life <= 0) { particles.splice(i, 1); continue; }
+        ctx.beginPath(); ctx.arc(p.x, p.y, 3, 0, Math.PI * 2); ctx.fillStyle = p.color; ctx.globalAlpha = p.life; ctx.fill();
+    }
+    ctx.globalAlpha = 1.0;
+}
+
+sliderA.addEventListener('input', updateValues); sliderP.addEventListener('input', updateValues); sliderQ.addEventListener('input', updateValues);
+shootBtn.addEventListener('click', () => { if (!isShooting) { isShooting = true; ballX = 0; animateShoot(); } });
+function gameLoop() { if (!isShooting) draw(); requestAnimationFrame(gameLoop); }
+updateValues(); gameLoop();

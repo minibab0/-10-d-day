@@ -2,7 +2,6 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>농구</title>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -12,29 +11,24 @@
             <h1 id="game-title">농구</h1>
             <div id="level-display">STAGE: <span id="currentLevel">1</span> / 5</div>
         </div>
-        
         <canvas id="gameCanvas" width="800" height="400"></canvas>
-        
-        <div id="equation-viewer">
-            현재 식: <span id="equationText">y = -0.100(x - 15.000)² + 15.000</span>
-        </div>
-
+        <div id="equation-viewer">현재 식: <span id="equationText">계산 중...</span></div>
         <div id="controls">
             <div class="control-group">
-                <label for="sliderP">중앙축 (p): <span id="valP">15.000</span></label>
-                <input type="range" id="sliderP" min="2" max="35" step="0.001" value="15">
+                <label>중앙축 (p): <span id="valP">0</span></label>
+                <input type="range" id="sliderP" step="0.001">
             </div>
             <div class="control-group">
-                <label for="sliderQ">최고 높이 (q): <span id="valQ">15.000</span></label>
+                <label>최고 높이 (q): <span id="valQ">0</span></label>
                 <input type="range" id="sliderQ" min="5" max="18" step="0.001" value="15">
             </div>
             <div class="control-group">
-                <label for="sliderA">곡률 (a): <span id="valA">-0.100</span></label>
-                <input type="range" id="sliderA" min="-0.3" max="-0.03" step="0.001" value="-0.1">
+                <label>곡률 (a): <span id="valA">0</span></label>
+                <input type="range" id="sliderA" step="0.001">
             </div>
             <button id="shootBtn">발사!</button>
         </div>
-        <div id="message">단계별로 조절 가능한 범위가 변합니다!</div>
+        <div id="message">공을 골대에 넣어보세요!</div>
     </div>
     <script src="script.js"></script>
 </body>

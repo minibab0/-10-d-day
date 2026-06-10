@@ -2,7 +2,7 @@ body {
     margin: 0; 
     background-color: #1a1a2e; 
     color: #fff; 
-    font-family: sans-serif; 
+    font-family: 'Malgun Gothic', sans-serif; 
     display: flex; 
     justify-content: center; 
     align-items: center; 
@@ -13,6 +13,7 @@ body {
     padding: 20px; 
     border-radius: 15px; 
     width: 840px; 
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
 }
 #header { 
     display: flex; 
@@ -20,7 +21,8 @@ body {
     align-items: center; 
     margin-bottom: 10px; 
 }
-#game-title { margin: 0; color: #e94560; }
+#game-title { margin: 0; color: #e94560; font-weight: bold; font-size: 24px; }
+#level-display { background: #0f3460; padding: 5px 15px; border-radius: 20px; font-weight: bold; color: #00d2ff; }
 canvas { 
     background: #0f3460; 
     border: 2px solid #e94560; 
@@ -36,6 +38,7 @@ canvas {
     text-align: center; 
     color: #00ff00; 
     font-family: monospace; 
+    font-size: 16px;
 }
 #controls { 
     display: flex; 
@@ -51,7 +54,7 @@ canvas {
     align-items: center; 
     width: 28%; 
 }
-input[type=range] { width: 100%; }
+input[type=range] { width: 100%; cursor: pointer; }
 #shootBtn { 
     padding: 10px 25px; 
     background: #e94560; 
@@ -60,6 +63,7 @@ input[type=range] { width: 100%; }
     border-radius: 5px; 
     cursor: pointer; 
     font-weight: bold; 
+    font-size: 16px;
 }
 #shootBtn:hover { background: #ff4d6d; }
-#message { text-align: center; margin-top: 10px; color: #ffd700; height: 20px; }
+#message { text-align: center; margin-top: 15px; color: #ffd700; font-weight: bold; height: 20px; }

@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>농구</title>
+    <title>농구 (수학 포물선 게임)</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -18,20 +18,20 @@
         
         <div id="controls">
             <div class="control-group">
-                <label>중앙축 (p): <span id="valP">0.000</span></label>
-                <input type="range" id="sliderP" step="0.001">
+                <label>중앙축 (p): <span id="valP">15.000</span></label>
+                <input type="range" id="sliderP" min="10" max="40" step="0.001" value="15">
             </div>
             <div class="control-group">
-                <label>최고 높이 (q): <span id="valQ">0.000</span></label>
-                <input type="range" id="sliderQ" min="5" max="18" step="0.001" value="15">
+                <label>최고 높이 (q): <span id="valQ">15.000</span></label>
+                <input type="range" id="sliderQ" min="5" max="25" step="0.001" value="15">
             </div>
             <div class="control-group">
-                <label>곡률 (a): <span id="valA">0.000</span></label>
-                <input type="range" id="sliderA" step="0.001">
+                <label>곡률 (a): <span id="valA">-0.100</span></label>
+                <input type="range" id="sliderA" min="-0.2" max="-0.02" step="0.001" value="-0.1">
             </div>
             <button id="shootBtn">발사!</button>
         </div>
-        <div id="message">공을 골대에 넣어보세요!</div>
+        <div id="message">슬라이더를 움직여 전체 궤도를 확인하세요!</div>
     </div>
     <script src="script.js"></script>
 </body>

@@ -11,19 +11,22 @@
             <h1 id="game-title">농구</h1>
             <div id="level-display">STAGE: <span id="currentLevel">1</span> / 5</div>
         </div>
+        
         <canvas id="gameCanvas" width="800" height="400"></canvas>
+        
         <div id="equation-viewer">현재 식: <span id="equationText">계산 중...</span></div>
+        
         <div id="controls">
             <div class="control-group">
-                <label>중앙축 (p): <span id="valP">0</span></label>
+                <label>중앙축 (p): <span id="valP">0.000</span></label>
                 <input type="range" id="sliderP" step="0.001">
             </div>
             <div class="control-group">
-                <label>최고 높이 (q): <span id="valQ">0</span></label>
+                <label>최고 높이 (q): <span id="valQ">0.000</span></label>
                 <input type="range" id="sliderQ" min="5" max="18" step="0.001" value="15">
             </div>
             <div class="control-group">
-                <label>곡률 (a): <span id="valA">0</span></label>
+                <label>곡률 (a): <span id="valA">0.000</span></label>
                 <input type="range" id="sliderA" step="0.001">
             </div>
             <button id="shootBtn">발사!</button>

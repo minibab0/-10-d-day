@@ -6,7 +6,6 @@ const valA = document.getElementById('valA'), valP = document.getElementById('va
 const levelText = document.getElementById('currentLevel'), eqText = document.getElementById('equationText');
 const shootBtn = document.getElementById('shootBtn'), message = document.getElementById('message');
 
-// 좌표계 설정
 const scale = 20; 
 const originX = 40;  
 const originY = 350; 
@@ -14,8 +13,8 @@ const originY = 350;
 let isShooting = false;
 let ballX = 0, startX = 0, vx = 0.4; 
 let particles = [];
+let reqId = null; // 애니메이션 충돌 방지용 ID
 
-// 단계별 골대 위치 데이터
 const levels = [
     { x: 20, y: 8 },
     { x: 28, y: 12 },
@@ -31,7 +30,7 @@ function getCanvasY(mathY) { return originY - mathY * scale; }
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // 1. 지면(바닥선) 그리기
+    // 바닥선
     ctx.beginPath(); 
     ctx.strokeStyle = '#666'; 
     ctx.lineWidth = 2;
@@ -41,35 +40,33 @@ function draw() {
 
     const stage = levels[currentLevelIdx];
     
-    // 2. 골대 그리기
+    // 골대
     const hx = getCanvasX(stage.x), hy = getCanvasY(stage.y);
     ctx.fillStyle = '#f0f0f0'; 
-    ctx.fillRect(hx + 10, hy - 50, 6, 100); // 백보드
-    
+    ctx.fillRect(hx + 10, hy - 50, 6, 100); 
     ctx.beginPath(); 
     ctx.strokeStyle = '#ff4500'; 
     ctx.lineWidth = 4;
     ctx.moveTo(hx - 25, hy); 
     ctx.lineTo(hx + 10, hy); 
-    ctx.stroke(); // 링
+    ctx.stroke(); 
 
-    // 슬라이더 값 가져오기
     const a = parseFloat(sliderA.value);
     const p = parseFloat(sliderP.value);
     const q = parseFloat(sliderQ.value);
 
-    // [핵심 수정] 이차방정식의 근을 구하여 공이 무조건 땅(y=0)에서 시작하도록 계산
+    // 공이 시작할 바닥 좌표(이차방정식의 근)
     startX = p - Math.sqrt(Math.abs(q / a));
 
     if (!isShooting) {
-        // 3. 전체 궤도 점선 표시 (땅에서부터 지면에 닿을 때까지)
+        // 전체 궤도 점선 표시
         ctx.beginPath(); 
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)'; 
         ctx.setLineDash([5, 5]);
         
         for (let x = startX; x <= 45; x += 0.5) {
             const y = a * Math.pow(x - p, 2) + q;
-            if (y < 0) { 
+            if (y < -0.1) { // 부동소수점 오차로 점선이 끊기는 현상 방지
                 ctx.lineTo(getCanvasX(x), getCanvasY(y));
                 break; 
             }
@@ -79,10 +76,10 @@ function draw() {
         ctx.stroke(); 
         ctx.setLineDash([]);
         
-        // 발사 전 공은 땅(startX)에 대기
+        // 대기 중인 공
         drawBall(startX, 0);
     } else {
-        // 발사된 공은 식을 따라 움직임
+        // 날아가는 공
         const currentY = a * Math.pow(ballX - p, 2) + q;
         drawBall(ballX, currentY);
     }
@@ -93,7 +90,6 @@ function draw() {
 function drawBall(x, y) {
     const cx = getCanvasX(x), cy = getCanvasY(y);
     const radius = 12;
-    
     ctx.beginPath();
     const grad = ctx.createRadialGradient(cx - 3, cy - 3, 2, cx, cy, radius);
     grad.addColorStop(0, '#ff9933'); 
@@ -106,53 +102,59 @@ function drawBall(x, y) {
     ctx.stroke();
 }
 
-function startShoot() {
-    if (isShooting) return;
-    
-    // 계산된 시작점(땅)에서 출발
-    ballX = startX; 
-    isShooting = true; 
-    message.innerText = "날아갑니다!";
-    animate();
-}
-
-function animate() {
-    if (!isShooting) return;
-    
-    ballX += vx; 
-    
-    const a = parseFloat(sliderA.value);
-    const p = parseFloat(sliderP.value);
-    const q = parseFloat(sliderQ.value);
-    
-    const currentY = a * Math.pow(ballX - p, 2) + q;
-    const stage = levels[currentLevelIdx];
-
-    // 백보드 충돌 판정 (수학 그래프가 백보드 벽을 통과할 때)
-    if (ballX >= stage.x + 0.3 && currentY > stage.y - 2.5 && currentY < stage.y + 2.5) {
-        message.innerText = "텅! 백보드에 부딪혔습니다. 포물선을 높여보세요!";
-        isShooting = false; 
+// 애니메이션 단일 루프 엔진 (오류 해결의 핵심)
+function gameLoop() {
+    if (!isShooting && particles.length === 0) {
+        reqId = null; // 작업이 없으면 루프 완전 종료 (성능 최적화)
         return;
     }
 
-    // 골인 판정 (공이 정점 p를 지나 하강하며 링을 통과할 때)
-    if (ballX >= stage.x - 1.5 && ballX <= stage.x + 0.5 && Math.abs(currentY - stage.y) < 1.0 && ballX > p) {
-        message.innerText = "클린 샷! 완벽한 이차함수입니다! 🎆"; 
-        isShooting = false;
-        createFireworks(getCanvasX(ballX), getCanvasY(currentY));
-        setTimeout(nextLevel, 1500); 
-        return;
-    }
+    if (isShooting) {
+        ballX += vx; 
+        
+        const a = parseFloat(sliderA.value);
+        const p = parseFloat(sliderP.value);
+        const q = parseFloat(sliderQ.value);
+        const currentY = a * Math.pow(ballX - p, 2) + q;
+        const stage = levels[currentLevelIdx];
 
-    // 실패 판정 (공이 땅에 닿거나 캔버스를 벗어남)
-    if (currentY < -0.5 || ballX > 45) {
-        message.innerText = "아쉽네요! 다시 조절해보세요."; 
-        isShooting = false; 
-        return;
+        // 충돌 판정
+        if (ballX >= stage.x + 0.3 && currentY > stage.y - 2.5 && currentY < stage.y + 2.5) {
+            message.innerText = "텅! 백보드에 부딪혔습니다. 포물선을 높여보세요!";
+            isShooting = false; 
+            setTimeout(resetBall, 1000);
+        } 
+        else if (ballX >= stage.x - 1.5 && ballX <= stage.x + 0.5 && Math.abs(currentY - stage.y) < 1.0 && ballX > p) {
+            message.innerText = "클린 샷! 완벽한 이차함수입니다! 🎆"; 
+            isShooting = false;
+            createFireworks(getCanvasX(ballX), getCanvasY(currentY));
+            setTimeout(nextLevel, 1500); 
+        } 
+        else if (currentY < -0.5 || ballX > 45) {
+            message.innerText = "아쉽네요! 다시 조절해보세요."; 
+            isShooting = false; 
+            setTimeout(resetBall, 1000);
+        }
     }
     
     draw();
-    requestAnimationFrame(animate);
+    reqId = requestAnimationFrame(gameLoop);
+}
+
+function startShoot() {
+    if (isShooting) return; // 중복 클릭 방지
+    ballX = startX; 
+    isShooting = true; 
+    message.innerText = "날아갑니다!";
+    
+    if (!reqId) {
+        gameLoop(); // 멈춰있던 엔진 가동
+    }
+}
+
+function resetBall() {
+    isShooting = false;
+    updateValues(); // 공을 제자리로 돌림
 }
 
 function nextLevel() {
@@ -167,7 +169,11 @@ function updateValues() {
     valP.innerText = parseFloat(sliderP.value).toFixed(3);
     valQ.innerText = parseFloat(sliderQ.value).toFixed(3);
     eqText.innerText = `y = ${valA.innerText}(x - ${valP.innerText})² + ${valQ.innerText}`;
-    draw();
+    
+    // 발사 중이 아닐 때만 화면을 갱신 (루프 충돌 방지)
+    if (!isShooting) {
+        draw();
+    }
 }
 
 function createFireworks(x, y) {
@@ -175,6 +181,7 @@ function createFireworks(x, y) {
         const angle = Math.random() * Math.PI * 2, speed = Math.random() * 6 + 2;
         particles.push({ x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, color: `hsl(${Math.random() * 360}, 100%, 60%)`, life: 1.0 });
     }
+    if (!reqId) gameLoop(); // 폭죽을 그리기 위해 엔진 가동
 }
 
 function updateParticles() {
@@ -193,12 +200,5 @@ sliderP.addEventListener('input', updateValues);
 sliderQ.addEventListener('input', updateValues);
 shootBtn.addEventListener('click', startShoot);
 
-// 브라우저 켜짐과 동시에 실행
-window.onload = function() {
-    updateValues();
-    function loop() { 
-        if(!isShooting) draw(); 
-        requestAnimationFrame(loop); 
-    }
-    loop();
-};
+// 브라우저 켜짐과 동시에 초기 1회 렌더링
+window.onload = () => updateValues();

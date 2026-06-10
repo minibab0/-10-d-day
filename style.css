@@ -26,7 +26,6 @@ canvas {
     border: 2px solid #e94560; 
     border-radius: 8px; 
     display: block; 
-    /* CSS 패딩이나 마진으로 인한 좌표 왜곡 방지 */
     box-sizing: border-box; 
 }
 #equation-viewer { 
@@ -62,4 +61,5 @@ input[type=range] { width: 100%; }
     cursor: pointer; 
     font-weight: bold; 
 }
+#shootBtn:hover { background: #ff4d6d; }
 #message { text-align: center; margin-top: 10px; color: #ffd700; height: 20px; }
